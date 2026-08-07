@@ -203,9 +203,11 @@ one requires none, which makes every gate here advisory.
 `.github/required-status-checks.md` holds the names that are ready to be
 required and the two that must not be, and it says in its own words that nothing
 in it changes a repository setting. Changing the ruleset is an act somebody
-takes against that list. No issue on this board is currently the place where
-that act is recorded, and that gap is worth an issue rather than a sentence
-here.
+takes against that list, and #128 is where that act is recorded. It was opened
+because this section, as first written, said no issue held it and left the gap
+as a sentence in a document, which is the shape this whole file exists to avoid.
+#97 is the neighbouring act on the same ruleset for verified signatures, and the
+two are separate so they can be argued and reversed separately.
 
 ## What this document does not settle
 
