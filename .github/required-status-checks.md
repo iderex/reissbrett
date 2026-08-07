@@ -11,6 +11,11 @@ Nothing in this file changes a repository setting. It produces the list, so that
 the change to the ruleset is a single reviewed act rather than an accumulation of
 half remembered names.
 
+Why each of these checks exists at all, and where this repository's gate departs
+from the one it is held to, is `docs/gate-parity.md`. That document argues the
+deviations and points back here for the names, so the names are maintained in one
+place and not two.
+
 ## Where the branch stands today
 
     gh api repos/iderex/reissbrett/rulesets --jq '.[] | {id, name, enforcement}'
