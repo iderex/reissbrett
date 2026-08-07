@@ -1,0 +1,47 @@
+# What the hosted runner actually is, measured from inside a run rather than
+# assumed from the runner image. #19 and #31 both ask for the display and the
+# elevation facts to be established rather than believed, and nothing in this
+# repository had ever printed either of them.
+#
+# This branch is a measurement and is not merged.
+name: runner-facts
+
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  facts:
+    name: What the runner is
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Print the user, the display and the elevation route
+        run: |
+          set -uo pipefail
+          echo "id: $(id)"
+          echo "whoami: $(whoami)"
+          echo "euid: $(id -u)"
+          echo "DISPLAY is set: ${DISPLAY:-<unset>}"
+          echo "WAYLAND_DISPLAY is set: ${WAYLAND_DISPLAY:-<unset>}"
+          echo "X11 sockets: $(ls -A /tmp/.X11-unix 2>/dev/null | tr '\n' ' ' || true)<end>"
+          echo "xvfb on PATH: $(command -v Xvfb || echo '<absent>')"
+          echo "xorg on PATH: $(command -v X || echo '<absent>')"
+          echo "sudo present: $(command -v sudo || echo '<absent>')"
+          # -n means never prompt. A zero exit here says this job could become
+          # root without a password, which is a different statement from the job
+          # running as a non-root user, and both belong in the record.
+          if sudo -n true 2>/dev/null; then
+            echo "passwordless sudo: yes"
+          else
+            echo "passwordless sudo: no"
+          fi
+          echo "runner image: ${ImageOS:-<unset>} ${ImageVersion:-<unset>}"
