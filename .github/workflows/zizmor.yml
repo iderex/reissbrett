@@ -1,6 +1,8 @@
-# Static analysis of the GitHub Actions workflows themselves (zizmor). The
-# workflow YAML is release-critical attack surface - publish-beta.yml runs on
-# every push to main with contents:write - so it is audited like any other code.
+# Static analysis of the GitHub Actions workflows themselves (zizmor). Workflow
+# YAML is attack surface like any other code: a job that runs on a push to the
+# default branch with write permissions can change what this repository produces
+# and publishes, so the YAML is audited rather than trusted. Nothing in this tree
+# publishes yet, and the audit is in place before it does rather than after.
 #
 # The gate runs zizmor's regular persona at --min-severity=low: it fails the
 # build on any actionable (low/medium/high/critical) security finding -
@@ -10,9 +12,10 @@
 # actionable"). The pedantic persona is deliberately NOT used to gate: it adds
 # low-severity hygiene findings (undocumented permissions, missing concurrency,
 # pin-comment mismatches, unnamed jobs) that are stylistic, not security-blocking,
-# and some are context-blind (it would demand run-cancelling concurrency on the
-# release workflows, which must never be cancelled mid-publish). That backlog is
-# tracked as a code-quality task (#263), not gated here.
+# and some are context-blind: run-cancelling concurrency is right for an audit job
+# and wrong for a job that publishes, and the persona cannot tell the two apart.
+# Those findings are not gated here. Whether any of them is worth acting on is a
+# judgement for a reviewer, not something this gate decides.
 #
 # Rule for future workflow changes: every new or edited workflow must pass this
 # gate before merge. Keep actions SHA-pinned, keep checkout on
