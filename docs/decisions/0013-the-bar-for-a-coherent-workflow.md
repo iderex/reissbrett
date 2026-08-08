@@ -36,6 +36,8 @@ handles.
 ### 1. Time and steps to a first finished part
 
 The headline number, and the easiest to game, so it carries the most definition.
+#61 is what delivers it, because the time to a first finished part is the time
+the guided path takes, and #69 is the worked example a person is taught on.
 
 The numbers. A median of ninety minutes or less. At least seven observers out of
 ten reaching a finished part at all. A median of three or fewer off-product
