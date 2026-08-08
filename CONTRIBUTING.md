@@ -113,9 +113,24 @@ obstacle to get around. The way around it is one word, `--no-gpg-sign`, and a
 commit that took it builds and reviews exactly like one that did not, which is
 what makes it worth naming here.
 
+If you have not set signing up, the shortest route adds no tool you do not
+already have. An SSH key you already use will do:
+
+    git config --global gpg.format ssh
+    git config --global user.signingkey ~/.ssh/id_ed25519.pub
+    git config --global commit.gpgsign true
+
+Then add the same key to your GitHub account a second time, as a signing key.
+That step is the one people miss, and skipping it produces a commit that is
+signed and not verified, which are different states. Check the result against
+the platform rather than against your clone:
+
+    gh api repos/iderex/reissbrett/commits/<sha> --jq '.commit.verification | {verified, reason}'
+
 PROSE, NOT ENFORCEMENT for the signature. The ruleset on `main` does not require
 verified signatures, so nothing refuses an unsigned commit today. #97 is the
-issue that owes it. The sign-off check is a different case: it runs and it goes
+issue that owes it, and `docs/verified-signatures.md` is where the request, its
+cost and what happens to work already on branches are written down. The sign-off check is a different case: it runs and it goes
 red, but it is not yet a required check, so a red DCO run does not by itself
 stop a merge. `.github/required-status-checks.md` is where that changes.
 
