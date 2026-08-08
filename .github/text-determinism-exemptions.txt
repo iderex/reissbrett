@@ -1,0 +1,17 @@
+# Tracked paths exempt from the text-determinism check, one exact path per line.
+#
+# A path listed here is not checked for its stored line endings, is not checked
+# for UTF-8 validity, and is left out of the renormalisation comparison. Nothing
+# else exempts a file: the check reads this file and no pattern in the workflow.
+#
+# An entry is a full path from the repository root, matched exactly. No globs,
+# because a glob exempts files nobody looked at, including ones added later.
+#
+# Add an entry only with the reason on the line above it, and only where the
+# file genuinely cannot satisfy the rule. A fixture that must carry a carriage
+# return to prove what it exists to prove is the case this list is for. A file
+# that is merely inconvenient to fix is not.
+#
+# The list is empty. Every tracked text file in this repository is stored as
+# UTF-8 without a byte order mark and with LF line endings, and none of them
+# needs an exception.

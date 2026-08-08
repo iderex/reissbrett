@@ -1,0 +1,47 @@
+# Line endings and text classification for every tracked file.
+#
+# The rule this file exists for: what is stored in git and what a fresh checkout
+# writes must not depend on which platform the checkout happens on. M3 stores
+# model data and compares it byte for byte, so a fixture rewritten in transit is
+# a fixture that proves nothing, and the failure surfaces as a store test that
+# passes on one machine and fails on another.
+#
+# text=auto lets git decide text from binary by content. eol=lf removes the
+# platform from the answer for everything it decides is text: LF in the object
+# database and LF in the working tree, on Windows as well as on Linux.
+* text=auto eol=lf
+
+# The types tracked today, declared rather than detected. A declaration survives
+# a file whose first bytes happen to look unusual to the detector.
+*.md            text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.txt           text eol=lf
+.gitattributes  text eol=lf
+DCO             text eol=lf
+LICENSE         text eol=lf
+NOTICE.md       text eol=lf
+
+# Content that must never be line-ending converted, because a converted byte is
+# a corrupted file rather than a reformatted one. None of these is tracked yet.
+# The declarations are here so the first one added is safe on the way in rather
+# than discovered afterwards, which is the case this whole file is about.
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.pdf     binary
+*.zip     binary
+*.7z      binary
+*.gz      binary
+*.AppImage binary
+*.dmg     binary
+*.exe     binary
+
+# The CAD suite's own document format is a zip container. A line-ending
+# conversion inside one produces an archive that no longer opens, and this
+# project will carry them as fixtures from M3 onward.
+*.FCStd   binary
+*.FCStd1  binary
+*.FCBak   binary

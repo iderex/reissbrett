@@ -1,0 +1,149 @@
+# Text determinism: what git stores and what a fresh checkout writes must not
+# depend on the platform the checkout happens on.
+#
+# This project is developed on Windows and Linux and it will store model data in
+# M3 that is compared byte for byte. A fixture whose bytes changed on the way
+# into git proves nothing, and the failure shows up as a store test that passes
+# on one machine and fails on another, which costs a day every time before
+# anybody suspects the line endings.
+#
+# .gitattributes declares the rule. This check is what refuses a violation of it,
+# because a declaration that nothing reads is a preference. The exemption list at
+# .github/text-determinism-exemptions.txt is the only way a file is skipped.
+name: text-determinism
+
+on:
+  # Every branch and every pull request. A branch push is where a bad fixture is
+  # caught cheapest, and the check is a read-only scan of the tracked tree.
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Read-only: the check reads the tracked tree and the index. It writes to the
+# index of a throwaway checkout and never to the repository.
+permissions:
+  contents: read
+
+# Cancel a superseded run on the same ref. The scan is idempotent, so re-running
+# it costs nothing and an obsolete result is worth nothing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  text:
+    # The check run name. #29 names it as a required context by this literal
+    # string, so renaming it here silently removes the gate.
+    name: Text encoding and line endings
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # No step pushes, so do not persist the GITHUB_TOKEN in .git/config.
+          persist-credentials: false
+
+      - name: Refuse non-deterministic tracked text
+        run: |
+          set -euo pipefail
+
+          exemptions='.github/text-determinism-exemptions.txt'
+
+          # The exemption list is data, not a pattern in this script. Comments
+          # and blank lines are dropped; everything else is an exact path.
+          exempt=''
+          if [ -f "$exemptions" ]; then
+            exempt=$(sed -e 's/[[:space:]]*$//' "$exemptions" \
+              | grep -v -e '^#' -e '^$' || true)
+          fi
+
+          is_exempt() {
+            [ -n "$exempt" ] || return 1
+            printf '%s\n' "$exempt" | grep -qxF -- "$1"
+          }
+
+          fail=0
+
+          # Leg 1: how each tracked file is stored. git ls-files --eol reports
+          # the index line ending as i/lf, i/crlf, i/mixed, i/none for a file
+          # with no line endings at all, or i/-text for content git classifies
+          # as binary. Only lf, none and -text are acceptable in the object
+          # database; anything else is a byte that will differ per platform.
+          #
+          # The walk is guarded explicitly: a `git ls-files` failure inside a
+          # process substitution does not trip `set -e`, and a scan that never
+          # ran must not read as a scan that found nothing.
+          listing=$(git ls-files --eol) || {
+            echo "::error::Could not list the tracked tree. Failing closed."
+            exit 1
+          }
+
+          while IFS=$'\t' read -r meta path; do
+            [ -n "$path" ] || continue
+            idx=$(printf '%s' "$meta" | awk '{print $1}')
+
+            if is_exempt "$path"; then
+              echo "exempt $path ($idx)"
+              continue
+            fi
+
+            case "$idx" in
+              i/lf|i/none|i/-text)
+                ;;
+              *)
+                echo "FAIL  $path is stored as $idx"
+                fail=1
+                continue
+                ;;
+            esac
+
+            # Leg 2: encoding, read from the stored blob rather than from the
+            # working tree, so the answer is about what is in git. UTF-8 only,
+            # and no byte order mark: a BOM is invisible in a diff and turns the
+            # first line of a file into something a parser does not recognise.
+            [ "$idx" = "i/-text" ] && continue
+
+            if ! git show ":$path" | iconv -f UTF-8 -t UTF-8 >/dev/null 2>&1; then
+              echo "FAIL  $path is not valid UTF-8"
+              fail=1
+              continue
+            fi
+
+            if [ "$(git show ":$path" | head -c 3 | od -An -tx1 | tr -d ' \n')" = "efbbbf" ]; then
+              echo "FAIL  $path starts with a UTF-8 byte order mark"
+              fail=1
+              continue
+            fi
+
+            echo "ok    $path ($idx)"
+          done <<EOF
+          $listing
+          EOF
+
+          # Leg 3: the condition the other two are legible special cases of.
+          # Re-adding every non-exempt file applies .gitattributes to the bytes
+          # a fresh checkout produced. If that changes the index, then what is
+          # stored and what a checkout writes are different files.
+          pathspec=('.')
+          while IFS= read -r p; do
+            [ -n "$p" ] && pathspec+=(":(exclude)$p")
+          done <<EOF
+          $exempt
+          EOF
+
+          git add --renormalize -- "${pathspec[@]}"
+          if ! git diff --cached --quiet; then
+            echo "::error::These tracked files are stored differently from what a fresh checkout produces under .gitattributes. Run 'git add --renormalize .' and commit the result."
+            git diff --cached --name-only
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Tracked text is not deterministic. See the failures above, fix them, or add the path to ${exemptions} with the reason."
+            exit 1
+          fi
+
+          echo "Every tracked text file is stored as UTF-8 without a BOM, with LF, and matches a fresh checkout."
