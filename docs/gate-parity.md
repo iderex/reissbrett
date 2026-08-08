@@ -184,6 +184,19 @@ a plugin, and the evidence that matters most cannot sit in a pull request gate:
 is, precisely so that a green pull request is never read as a proven machine.
 Adding those checks to the gate would produce the opposite of what they are for.
 
+**Verified signatures on the protected branch.** #97, and
+`docs/verified-signatures.md` is where the request is argued. The reference's
+ruleset holds four rule types and signatures is not one of them, read on
+2026-08-08:
+
+    gh api repos/iderex/jellyfin-plugin-sso/rulesets/18802863 --jq '{bypass: .bypass_actors, required: [.rules[].type]}'
+    {"bypass":[],"required":["deletion","non_fast_forward","required_status_checks","pull_request"]}
+
+So this is a deviation upward rather than a row this repository is behind on,
+and the reference is not weaker for lacking it. It belongs here because #113
+signs release artefacts and a chain of custody that starts at the artefact does
+not reach the commits it was built from.
+
 **The real suite round trip on a schedule.** #99. It is listed here as well as
 against `e2e-login` above, because the reference's end to end run and this one
 are the same shape holding different content, and #99's own body calls it a
@@ -206,8 +219,9 @@ in it changes a repository setting. Changing the ruleset is an act somebody
 takes against that list, and #128 is where that act is recorded. It was opened
 because this section, as first written, said no issue held it and left the gap
 as a sentence in a document, which is the shape this whole file exists to avoid.
-#97 is the neighbouring act on the same ruleset for verified signatures, and the
-two are separate so they can be argued and reversed separately.
+#97 is the neighbouring act on the same ruleset for verified signatures, argued
+in `docs/verified-signatures.md`, and the two are separate so they can be argued
+and reversed separately.
 
 ## What this document does not settle
 
