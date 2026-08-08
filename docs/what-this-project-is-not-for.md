@@ -147,9 +147,19 @@ than only from the repository. There is no software. The readme is #114's, and
 a link added here would be a change outside the scope this work declared.
 
 It asks that the review checklist ask whether a change narrowing a limit made
-the statement sharper. The checklist is #115 and it does not exist. Until it
-does, the rule at the top of this document is the whole of it, and nothing
-refuses an edit that breaks it.
+the statement sharper. The question is now asked, in
+`.github/pull_request_template.md`, which is where a question put to a change
+belongs; the nine items in `docs/release-readiness-checklist.md` are evidence a
+release carries, and a change is reviewed long before one of those is run.
+
+Asked is the whole of it, and it is worth being blunt about how little that is.
+A template is a prompt. Nothing reads what somebody writes under it, nothing
+compares this document against a change that narrowed a limit, and a pull
+request that deletes the section entirely is refused by nothing. So the rule at
+the top of this document is still the only thing holding the sharper statement,
+and it is a rule about how a file is edited, which is the kind this tree has
+nothing to read. #95 is the nearest thing that could ever reach it, and what it
+would reach is a broken reference rather than a softened sentence.
 
 It asks for consistency with the warranty disclaimer once #100 lands. #100 is
 open. The section above reads the licence text in the tree, which is the
