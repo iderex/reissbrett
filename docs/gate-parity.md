@@ -50,6 +50,17 @@ this document, so where a row below is placed against one of them, the placement
 is from the name and from what the reference's own required list already says,
 and it is written as such.
 
+Some of the reasoning below was written later than the date above, and the
+commands in it were run at a different commit:
+
+    git rev-parse origin/main
+    3754f521eec8c2e74c4d253c83f88f382feb9f23
+
+Each of those blocks says so where it pastes its output. Moving the date at the
+top of this section instead would restamp readings that were never re-run, which
+is the defect this file is most exposed to and the one it is least able to
+afford.
+
 ## The required contexts, one by one
 
 Thirteen rows. Each says adopt, adapt or drop, why, and which issue on this
@@ -120,9 +131,55 @@ in `.github/required-status-checks.md` with the run it was read back from.
 project's own rules rather than the reference's, so the name may match while the
 content does not.
 
-**Enforce greppable invariants.** Adopt. #91 delivers it. What the invariants
-are cannot be written until there is code to grep, so this one is later than its
-position in the list suggests.
+**Enforce greppable invariants.** Adopt. #91 delivers it. The sentence that
+stood here said the invariants cannot be written until there is code to grep,
+and put this row later in the order than its position suggests. That is wrong
+for two of the six rules #91 names. Both are about tracked text rather than
+about code, and both are decidable over the tree as it stands. Read at
+`3754f521eec8c2e74c4d253c83f88f382feb9f23`.
+
+The first is that the pinned suite version appears in no file other than
+`docs/decisions/0005-the-pinned-suite-version.md`, which is the file that pins
+it. It appears in eight:
+
+    git grep -l '1\.1\.3' origin/main -- . | wc -l
+    8
+    git grep -l '1\.1\.3' origin/main -- .
+    origin/main:docs/decisions/0003-a-layer-over-the-existing-suite.md
+    origin/main:docs/decisions/0005-the-pinned-suite-version.md
+    origin/main:docs/decisions/0006-what-a-version-of-a-model-is.md
+    origin/main:docs/decisions/0009-the-committed-beginner-workflow.md
+    origin/main:docs/decisions/0011-the-delivery-form.md
+    origin/main:docs/decisions/0012-where-the-nearest-projects-fall-short.md
+    origin/main:docs/decisions/prior-collaboration-attempt.md
+    origin/main:docs/version-policy.md
+
+Seven of the eight carry it inside evidence: a command run against the upstream
+release list, a table of release dates, a sentence about which series the
+extensions route supports. A rule written to refuse a hardcoded version refuses
+all seven, so what #91 has to get right is not the pattern but the scope that
+separates a document quoting the version from a unit that depends on it, and
+that scope is what decides whether the rule earns its place at all. The near
+miss to spend the effort on is the document citing the version legitimately, not
+the file hardcoding it obviously. This row does not quote the pinned version, so
+the count above does not move because the row exists, and the fact that it had
+to be written that way is the scoping problem in miniature.
+
+The second finds nothing, which is the state #91's third condition is written
+against rather than a clean result. No absolute path from somebody's machine is
+in a tracked file:
+
+    git grep -nE '[A-Z]:\\Users|/home/[a-z]+/|/Users/[a-z]+/' origin/main -- . ; echo "exit=$?"
+    exit=1
+
+A pattern that has never matched anything is a pattern nobody has watched bite,
+so that rule ships with a fixture it refuses or it does not ship.
+
+The remaining four do wait on code, and naming which is what keeps this row
+honest in the other direction. The import rule from #37 needs units to import,
+the display rule from #31 needs a test job, the vocabulary rule needs #63's
+list, and the rule about a copy of or a patch against the suite's source needs
+#4.
 
 **Reject Trojan Source Unicode.** Adopted already, under the same literal name,
 and it runs on this repository today.
@@ -133,6 +190,29 @@ it runs on this repository today.
 **prettier.** Adapt. One formatter for one language becomes one per language
 named in #14, delivered by #17. A single required context covering several
 formatters is a choice #17 makes rather than one this document makes for it.
+
+The row as first written sent the whole of it to #17, and the reference's own
+formatter is wider than that. Markdown is inside its glob, read at
+`3754f521eec8c2e74c4d253c83f88f382feb9f23`:
+
+    gh api repos/iderex/jellyfin-plugin-sso/contents/.github/workflows/prettier.yml --jq '.content' | tr -d '\n' | base64 -d | grep -n 'prettier_options'
+    36:          prettier_options: '--check **/*.{js,html,md,css,scss}'
+
+and `prettier` is a required context there, so the reference formats its
+documentation under the same required name it formats its code under. Split here
+rather than followed. #17 takes the code half, because it is per language and
+waits on #14. #95 takes the documentation half, because #95 is the issue that
+owes documentation checking and because that half is deliverable before a
+language is named. There is something for it to run over and nothing for #17's
+half to run over:
+
+    git ls-tree -r --name-only origin/main -- docs/ | wc -l
+    18
+    git ls-tree -r --name-only origin/main | grep -cE '\.(go|py|cs|rs|ts|js|cpp|c|java)$'
+    0
+
+Whether the two halves end up behind one required name or two is #17's to settle
+when its gates land, and nothing here decides it.
 
 **dependency-review.** Adopted already, under the same literal name. It has
 nothing to review until #21 lands a lock file, which
@@ -152,6 +232,54 @@ names, and each names the issue here that would deliver the same thing.
 pins on the modules that decide security outcomes, rather than on the whole
 codebase, is #20, and the shape matters more than the number: a floor on
 everything is a floor nobody defends.
+
+Two of those placements are a name and nothing more, and both issues ask this
+document for the line of reasoning behind them rather than for the placement. It
+is written here. Both blocks were read at
+`3754f521eec8c2e74c4d253c83f88f382feb9f23`.
+
+`stryker-mutation`, and #93. Mutation testing is worth its cost where the test
+suite is the only thing standing between a defect and an outcome nobody can
+re-run: the version store in M3, where a restore that silently drops an entry
+looks exactly like a restore that worked, and the refusal paths in M6, where a
+collision check that silently passes looks exactly like a clean job. Coverage
+says a line executed and says nothing about whether removing it would have been
+noticed, and that gap is the whole reason for a second measurement rather than a
+higher threshold on the first. It reports rather than gates, and the reference
+holds the same position by its triggers:
+
+    gh api repos/iderex/jellyfin-plugin-sso/contents/.github/workflows/stryker-mutation.yml --jq '.content' | tr -d '\n' | base64 -d | sed -n '/^on:/,/^permissions:/p' | grep -vE '^\s*#|^$'
+    on:
+      schedule:
+        - cron: "41 5 * * 1"
+      workflow_dispatch:
+    permissions:
+
+A weekly run and a manual one, and no pull request trigger. A mutation score
+moves slowly and carries a tail of survivors nobody can act on inside a review,
+so a gate on it refuses changes for reasons that are not about the change. Which
+surfaces it runs over, and what happens to a score that falls, are #93's and
+this row does not take them.
+
+`wiki-lint`, and #95. The placement was made from a file name and the name
+points somewhere else, so what the reference runs there was read rather than
+assumed:
+
+    gh api repos/iderex/jellyfin-plugin-sso/contents/.github/workflows/wiki-lint.yml --jq '.content' | tr -d '\n' | base64 -d | sed -n '3,6p;41,44p'
+    # The wiki is a separate repository with no pull-request gate, so it can drift
+    # from the code silently (#873). This is the executable guard for that drift: it
+    # clones the live wiki and fails on broken internal anchors, file:line citations
+    # (the rule is to cite modules/types, not paths that move), and dead source links.
+          - name: Clone the wiki
+            # The wiki is public; a read-only anonymous clone needs no credentials.
+            run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "${RUNNER_TEMP}/wiki"
+          - name: Lint the wiki against the code tree
+
+So it resolves references from a separate repository against the code tree and
+formats nothing. That is one of the mechanical items #95 lists, the broken link
+to a file in the tree, and it is not the formatter half, which is the `prettier`
+row above. Both belong to #95 and they arrive from two different places in the
+reference, which is why neither row alone accounts for it.
 
 The publishing workflows have no counterpart here yet and are not a gate. What
 they correspond to is #113 for signing and publishing artefacts and #96 for
@@ -196,6 +324,21 @@ So this is a deviation upward rather than a row this repository is behind on,
 and the reference is not weaker for lacking it. It belongs here because #113
 signs release artefacts and a chain of custody that starts at the artefact does
 not reach the commits it was built from.
+
+**A vocabulary check and a check run name check over the documentation.** #95.
+The `wiki-lint` and `prettier` rows above account for the link resolution and
+the formatting, and these two have no counterpart in the reference at all. The
+vocabulary check reads #63's list and refuses a term used in a document that is
+not in it; it matters here because the words the guided path uses are what
+element 2 of the bar in #13 counts, and a document drifting from the list makes
+that count a measurement of nothing. The check run name check refuses a
+reference to a check run name that no workflow emits, and the failure it
+prevents is the one `.github/required-status-checks.md` is most exposed to: a
+renamed check leaves a required name behind that nothing produces, and the
+branch then holds a gate that can never go green or one that never runs,
+depending on which side the rename fell. Both wait on what they read, #63's list
+and a set of workflows emitting names, and neither is a row this repository is
+behind the reference on.
 
 **The real suite round trip on a schedule.** #99. It is listed here as well as
 against `e2e-login` above, because the reference's end to end run and this one
