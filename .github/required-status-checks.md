@@ -20,12 +20,29 @@ place and not two.
 
     gh api repos/iderex/reissbrett/rulesets --jq '.[] | {id, name, enforcement}'
     {"enforcement":"active","id":20485819,"name":"gate"}
-    gh api repos/iderex/reissbrett/rulesets/20485819 --jq '{enforcement, bypass: .bypass_actors, required: [.rules[].type]}'
-    {"bypass":[],"enforcement":"active","required":["deletion","non_fast_forward","pull_request"]}
+    gh api repos/iderex/reissbrett/rulesets/20485819 --jq '{enforcement, bypass: .bypass_actors, rules: [.rules[].type], required: [.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context]}'
+    {"bypass":[],"enforcement":"active","required":["DCO sign-off","dependency-review","Reject Trojan Source Unicode","Audit workflows (zizmor)","Text encoding and line endings","Enforce greppable invariants"],"rules":["deletion","non_fast_forward","pull_request","required_status_checks"]}
 
-A pull request is required, deletion and non-fast-forward are refused, and no
-status check is named. Every gate this repository has built so far is therefore
-advisory: it runs, it goes red, and the merge button stays green.
+A pull request is required, deletion and non-fast-forward are refused, and six
+status checks are named. The six are the six rows under `## The names`, taken
+from those rows rather than retyped, and each row carries the date it was
+required, so a row and the ruleset cannot drift apart in silence.
+
+The ruleset was changed on 2026-08-09, under #128, against this file as it stood
+at `21592f8e4517580297f25769ef09da9d216df9c2`. That commit is the merge that
+added the `Enforce greppable invariants` row, which is the sixth and the only one
+read back from a run other than the reference pull request.
+
+Two things in that output are worth reading rather than skipping. Neither of the
+names under `## The names that must not be required` is in the required list, and
+the bypass list is empty, both shown by the same command rather than asserted
+beside it.
+
+Before this, every gate this repository had built was advisory: it ran, it went
+red, and the merge button stayed green. That is what changed. What it costs is
+the failure this file exists to prevent, now live rather than hypothetical: a
+required name that no run produces blocks every merge until somebody with
+settings access changes the ruleset back, and no commit can undo it.
 
 ## The names
 
@@ -58,7 +75,7 @@ belongs to which workflow file, and which event produced it:
 
 Emitted by `.github/workflows/dco.yml`. It runs on `pull_request` only, on the
 types `opened`, `synchronize` and `reopened`, so it is capable of running on
-every pull request that could be merged. Nothing fails if it is required today.
+every pull request that could be merged. Required on `main` since 2026-08-09.
 
 What it costs to require: a pull request whose commits are not signed off cannot
 be merged, which is the point.
@@ -69,7 +86,7 @@ Emitted by `.github/workflows/dependency-review.yml`. It runs on `pull_request`
 only. The name is the job id rather than a `name:` field, and the workflow says
 in its own comment why it has none.
 
-Nothing fails if it is required today. Note that the tree declares no dependency
+Required on `main` since 2026-08-09. Note that the tree declares no dependency
 manifest of any kind, so the check passes over a diff with nothing in it to
 review:
 
@@ -83,25 +100,25 @@ under the same name.
 
 Emitted by `.github/workflows/unicode-guard.yml`. It runs on `push` to every
 branch and on `pull_request` against every base branch, so it is capable on
-every pull request. Nothing fails if it is required today.
+every pull request. Required on `main` since 2026-08-09.
 
 ### Audit workflows (zizmor)
 
 Emitted by `.github/workflows/zizmor.yml`. It runs on `push` to `main` and on
 `pull_request` against every base branch, so it is capable on every pull
-request. Nothing fails if it is required today.
+request. Required on `main` since 2026-08-09.
 
 ### Text encoding and line endings
 
 Emitted by `.github/workflows/text-determinism.yml`. It runs on `push` to every
 branch and on `pull_request` against every base branch, so it is capable on
-every pull request. Nothing fails if it is required today.
+every pull request. Required on `main` since 2026-08-09.
 
 ### Enforce greppable invariants
 
 Emitted by `.github/workflows/greppable-invariants.yml`. It runs on `push` to
 every branch and on `pull_request` against every base branch, so it is capable
-on every pull request. Nothing fails if it is required today.
+on every pull request. Required on `main` since 2026-08-09.
 
 This row is read back from a different pull request than the rest, because it
 did not exist when #125 ran. Pull request #140, at head
@@ -171,8 +188,24 @@ reading the file, and a name here that no run has produced is the Scorecard
 failure above waiting to happen. Every row in this file names the run it was
 read from, and a row that cannot name one does not belong in it yet.
 
+The issue that adds the check also answers whether the name is being required,
+in that issue, and the row here records which way it went. Required and not
+required are both answers and silence is not, because a check missing from the
+ruleset reads the same whether somebody weighed it and declined or nobody looked.
+The six names above went in as one act against a list that was already complete.
+That is available once. From here a name arrives on its own and is argued on its
+own, and the issue that brings it is the only place that reading happens.
+
+PROSE, NOT ENFORCEMENT, for both rules in this section, and no issue on this
+board owes a mechanism for either. A ruleset is a repository setting, so no
+commit can hold what it requires and nothing in this tree can compare the two.
+Whether an issue answered a question is a judgement about an issue body, and
+nothing in this repository reads one. What stands behind both sentences is a
+person reading a pull request, and saying so is the whole of what this mark
+does.
+
 M1 has gates that are not built. #17 owes a format and a lint check, #19 owes a
 unit test check, and #21 owes a restore that refuses a stale lock. Each of them
-fixes its own check run name, and each adds its row here when it lands. Until
-then this file lists what exists, which is not the same as listing what is
-wanted.
+fixes its own check run name, adds its row here when it lands, and says whether
+that name is being required. Until then this file lists what exists, which is not
+the same as listing what is wanted.
