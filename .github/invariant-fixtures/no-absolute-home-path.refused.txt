@@ -1,0 +1,22 @@
+Fixture: every indented line below has to be refused by the rule
+no-absolute-home-path in .github/invariants.txt.
+
+This file is excluded from the scan of the tree, because it holds the violation
+on purpose. What it proves is that the rule still bites, which nothing else in
+the run would notice: the tree is clean either way, so a pattern that lost an
+alternative would go green over it.
+
+The four shapes, one per line. Nothing here is a path anybody has.
+
+    C:\Users\example\src\reissbrett\notes.md
+    c:\Users\example\src\reissbrett\notes.md
+    /home/example/src/reissbrett/notes.md
+    /Users/example/src/reissbrett/notes.md
+
+The second line is the one the effort went into. A lowercase drive letter is
+what an editor's autocomplete produces and what a reader's eye reads as the
+uppercase one, and a rule written to match only the uppercase form passes it.
+
+Every other line in this file is prose and the rule has to match none of it,
+which the run also asserts: it compares the line numbers that matched against
+the line numbers that are indented and requires the two sets to be equal.

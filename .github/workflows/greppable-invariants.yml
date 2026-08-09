@@ -1,0 +1,207 @@
+# Greppable invariants: the rules a pattern search over tracked text can refuse.
+#
+# Some rules are a pattern away from being enforced, and leaving those as prose
+# leaves free enforcement on the table. The rules themselves are data, in
+# .github/invariants.txt, one record per rule with its pattern, its scope and
+# the failure it prevents. This file holds only the machinery that decides them,
+# so that adding a rule is a change to a file somebody reads rather than an edit
+# inside a script.
+#
+# The part that makes it worth anything is the fixtures. A pattern that was
+# written wrong matches nothing and passes every run, and over a clean tree
+# there is no other way to tell that apart from a rule that is working. So every
+# rule ships with a file it has to refuse and a file one token away from it that
+# it has to accept, and both are asserted on every run, per line.
+#
+# #91 is the issue. The rules that are not here yet are named in the header of
+# the rules file rather than in this comment, so the list lives in one place.
+
+name: greppable-invariants
+
+on:
+  # Every branch and every pull request. The scan is a read-only pass over the
+  # tracked tree, so a branch push is where a violation is caught cheapest.
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Read-only: the check reads the tracked tree and writes nothing anywhere.
+permissions:
+  contents: read
+
+# Cancel a superseded run on the same ref. The scan is idempotent, so an
+# obsolete result is worth nothing and a re-run costs nothing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  invariants:
+    # The check run name. .github/required-status-checks.md carries it as a
+    # literal string, so renaming it here removes the gate without failing
+    # anything.
+    name: Enforce greppable invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # No step pushes, so do not persist the GITHUB_TOKEN in .git/config.
+          persist-credentials: false
+
+      - name: Refuse a tracked file that violates a declared invariant
+        run: |
+          set -euo pipefail
+
+          rules='.github/invariants.txt'
+          fixtures='.github/invariant-fixtures'
+
+          if [ ! -f "$rules" ]; then
+            echo "::error::${rules} is missing, so no invariant was examined. Failing closed."
+            exit 1
+          fi
+
+          fail=0
+          seen=0
+
+          id=''
+          pattern=''
+          scope=''
+          reason=''
+
+          # git grep exits 0 when it matched, 1 when it did not, and 2 or more
+          # when the scan itself broke. Every call goes through this, and a
+          # broken scan is never read as a clean tree.
+          #
+          # The output lands in a variable rather than on stdout, and every
+          # caller runs this in the current shell. A function whose failure path
+          # is `exit` cannot be called inside `$( )`, because the exit would end
+          # the subshell and the run would carry on past a scanner that broke.
+          GREP_OUT=''
+          run_grep() {
+            local pat="$1"
+            shift
+            local rc=0
+            GREP_OUT=$(git grep -nE -e "$pat" -- "$@") || rc=$?
+            case "$rc" in
+              0|1)
+                ;;
+              *)
+                echo "::error::git grep exited ${rc} while scanning. Failing closed rather than reporting a clean tree."
+                exit 1
+                ;;
+            esac
+            return "$rc"
+          }
+
+          check_rule() {
+            [ -n "$id" ] || return 0
+
+            if [ -z "$pattern" ] || [ -z "$scope" ] || [ -z "$reason" ]; then
+              echo "::error::${rules}: rule '${id}' is missing a pattern, a scope or a reason. Failing closed."
+              exit 1
+            fi
+
+            local refused="${fixtures}/${id}.refused.txt"
+            local accepted="${fixtures}/${id}.accepted.txt"
+            local f
+            for f in "$refused" "$accepted"; do
+              if [ ! -f "$f" ]; then
+                echo "::error::rule '${id}' has no fixture at ${f}. A rule nobody watched bite does not ship."
+                exit 1
+              fi
+            done
+
+            seen=$((seen + 1))
+            echo "rule    ${id}"
+            echo "  scope   ${scope}"
+            echo "  reason  ${reason}"
+
+            # Leg 1: the rule still bites, and it bites on every shape the
+            # fixture declares. A line indented by four spaces is a declared
+            # violation. Comparing the two sets of line numbers is what catches
+            # a pattern that lost one of its alternatives: matching somewhere in
+            # the file would not.
+            local want got
+            want=$(grep -n '^    ' "$refused" | cut -d: -f1 | sort -n | tr '\n' ' ')
+            got=''
+            if run_grep "$pattern" "$refused"; then
+              got=$(printf '%s\n' "$GREP_OUT" | cut -d: -f2 | sort -n | tr '\n' ' ')
+            fi
+            if [ "$want" = "$got" ]; then
+              echo "  bites   yes, on lines ${got}of ${refused}"
+            else
+              echo "::error::rule '${id}' does not refuse what ${refused} declares. It declares violations on lines ${want}and the pattern matched lines ${got:-none}. The rule has stopped enforcing what it says it enforces."
+              fail=1
+            fi
+
+            # Leg 2: the near miss. A rule that also refuses the legal spelling
+            # beside the violation is a rule whoever meets it turns off.
+            if run_grep "$pattern" "$accepted"; then
+              echo "::error::rule '${id}' matches ${accepted}, which is legal text it has to accept."
+              printf '%s\n' "$GREP_OUT"
+              fail=1
+            else
+              echo "  near miss accepted"
+            fi
+
+            # Leg 3: the tree, everywhere the rule says it applies. The fixture
+            # directory is excluded here and nowhere else, because it holds the
+            # violation on purpose.
+            if run_grep "$pattern" "$scope" ":(exclude)${fixtures}/"; then
+              echo "::error::rule '${id}': ${reason}"
+              printf '%s\n' "$GREP_OUT"
+              fail=1
+            else
+              echo "  tree    clean under ${scope}"
+            fi
+
+            id=''
+            pattern=''
+            scope=''
+            reason=''
+          }
+
+          # The record walk. A value is everything after the first colon and
+          # space, so nothing here splits on whitespace and a pattern holding
+          # spaces survives.
+          while IFS= read -r line || [ -n "$line" ]; do
+            case "$line" in
+              ''|'#'*)
+                continue
+                ;;
+              '---')
+                check_rule
+                ;;
+              *)
+                key=${line%%:*}
+                value=${line#*": "}
+                case "$key" in
+                  id) id=$value ;;
+                  pattern) pattern=$value ;;
+                  scope) scope=$value ;;
+                  reason) reason=$value ;;
+                  *)
+                    echo "::error::${rules}: '${key}' is not a field this check reads. Failing closed rather than skipping a line that was meant to be a rule."
+                    exit 1
+                    ;;
+                esac
+                ;;
+            esac
+          done < "$rules"
+          check_rule
+
+          if [ "$seen" -eq 0 ]; then
+            echo "::error::${rules} declared no rule, so this run examined nothing. Failing closed."
+            exit 1
+          fi
+
+          echo "Examined ${seen} rule(s) from ${rules}."
+          echo "What this run does not judge: whether a rule is the right rule, and anything a pattern over tracked text cannot see. It reads what is written in the tree and never what a program does when it runs."
+
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
