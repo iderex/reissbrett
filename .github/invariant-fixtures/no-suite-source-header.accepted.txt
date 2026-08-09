@@ -1,0 +1,24 @@
+Fixture: the rule no-suite-source-header in .github/invariants.txt has to match
+nothing in this file.
+
+Each line below is legal text sitting close enough to the violation that a rule
+written slightly too wide would take it. A rule that refuses the correct
+spelling beside the violation is a rule whoever meets it turns off, and then it
+refuses nothing at all.
+
+    for detail see the LICENSE text file
+    This file is part of the reissbrett distribution and orchestration layer
+    Copyright (c) 2026 the reissbrett contributors
+    SPDX-License-Identifier: LGPL-2.1-or-later
+    The suite spells its licence file one way and this repository spells its own
+    file the other way, which is the whole of the difference on the first line.
+
+The first line is the one worth having. This repository's own licence file is
+spelled with an S and the suite spells its own with a C, so the two sentences
+are one character apart, and the C is the character that says a file came from
+somewhere else. A rule reaching for either spelling would be red on the day it
+landed, on this repository's own notices.
+
+The second line is the other direction. A banner naming this project rather than
+the suite is what a file written here carries, and refusing it would make the
+rule an obstacle to the ordinary case rather than to the one it is about.

@@ -37,12 +37,23 @@
 #       the pattern has to match none of it. A rule that also refuses the legal
 #       thing beside the violation is a rule whoever meets it turns off.
 #
-# What is not here yet, so an empty file is not read as a complete one. #91
-# names six rules. Four of them are about code and this tree holds none, so they
-# arrive with the thing they are about: the copy-or-patch rule with #4, the
-# import rule with the units #37 separates, the pinned-version rule once there
-# is a unit that depends on the version rather than a document quoting it, and
-# the vocabulary rule with #63's list.
+# What is not here yet, so a file that has grown is not read as a complete one.
+# #91 names six rules. The copy-or-patch rule from #4 is here, in the two halves
+# a content search decides. Three of the rest arrive with the thing they are
+# about: the import rule with the units #37 separates, the pinned-version rule
+# once there is a unit that depends on the version rather than a document
+# quoting it, and the vocabulary rule with #63's list.
+#
+# Two parts of the copy-or-patch rule are absent and neither is waiting on code.
+# #4 names a tracked file whose path ends in a patch or a diff extension, and
+# that is decidable over paths rather than over content, which is not what this
+# machinery does: every leg here hands a pattern to git grep and reads what is
+# inside a file. A rule of that shape needs a leg that reads the file list, and
+# adding one is a change to the workflow rather than a record here. The other
+# part is #4's own residual, and it is the larger of the two: a file copied out
+# of the suite and stripped of its banner matches nothing any pattern can write,
+# and deciding that case needs a comparison against the upstream tree at the
+# pinned tag rather than a search.
 
 id: no-absolute-home-path
 pattern: ([A-Za-z]:\\Users\\|/home/[A-Za-z0-9._-]+/|/Users/[A-Za-z0-9._-]+/)
@@ -54,4 +65,16 @@ id: no-display-server-in-workflows
 pattern: ([Xx][Vv][Ff][Bb]|[Xx]org|DISPLAY=|WAYLAND_DISPLAY)
 scope: .github/workflows/
 reason: A step that installs, starts or points at a display server makes the headless requirement in #31 a preference. Where this rule stops is worth more than what it covers: it reads the workflow files, so it refuses a display server that is declared in one, and it does not reach a test process that starts its own. The image already carries a server on its PATH, which #31 measured, so the second half needs a check over what the test process did and it is #31's rather than this file's.
+---
+
+id: no-suite-source-header
+pattern: (This file is part of the [F]reeCAD CAx development system|for detail see the LICEN[C]E text file)
+scope: .
+reason: A file lifted out of the suite's source tree keeps the banner that tree's own files carry, because the banner is the first thing a copy keeps and the last thing somebody thinks to remove. #4 decided that this repository carries no copy of that tree and no patch against it, with no exception list, and this is one half of the pattern share of that rule. Both alternatives are needed: the sentence naming the suite is absent from the machining module's Python files, which are the ones this project would be most tempted to lift from, and those carry the licence line instead. Where the rule stops is larger than what it covers, and it is #4's own residual: a copy stripped of its banner matches nothing, and deciding that case needs a comparison against the upstream tree at the pinned tag. The second alternative reads the spelling upstream uses for its licence file, so the spelling this repository uses for its own is accepted beside it.
+---
+
+id: no-suite-source-clone-in-workflows
+pattern: (clone.*[F]reeCAD/FreeCAD|repository:[ ]*[F]reeCAD/FreeCAD|submodule.*[F]reeCAD/FreeCAD)
+scope: .github/workflows/
+reason: A build step that fetches the suite's source and builds from it carries the same thing a tracked copy would, and #4 refuses it in the same sentence. Fetching a release artefact and shipping it unchanged is not this, which is what #11's bundle does and what #108 builds, so the alternatives are written to pass a read of the upstream repository's metadata and a download of one of its releases. Where the rule stops: it is a pattern over the lines of a workflow file, so a target sitting on the line after a continuation is not seen, and it does not reach whatever #16 adds outside that directory. The scope is the workflow directory rather than the whole of .github, because SECURITY.md sends a defect in the suite to the suite's own advisory route and that link is the policy working.
 ---
