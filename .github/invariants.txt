@@ -54,6 +54,27 @@
 # of the suite and stripped of its banner matches nothing any pattern can write,
 # and deciding that case needs a comparison against the upstream tree at the
 # pinned tag rather than a search.
+#
+# A seventh rule reached #91 after its body was written, so the six above are not
+# the whole of what this file owes. Entry 2 of #1 was decided on 2026-08-09: the
+# server carries AGPL-3.0 and the extensions carry LGPL-2.1, which is the licence
+# of the suite they load into, and the comment that decides it sends the boundary
+# between the two here as a pattern rule so that moving a file does not move its
+# licence with it in silence:
+#
+#     gh api repos/iderex/reissbrett/issues/1/comments --jq '.[] | select(.body | test("grepbare Invariante")) | "\(.created_at) \(.html_url)"'
+#     2026-08-08T22:39:02Z https://github.com/iderex/reissbrett/issues/1#issuecomment-5228532779
+#
+# Neither half of that rule is available, and the two are absent for different
+# reasons. A path-level form of the boundary waits on the layout in #15, because
+# docs/decisions/0100-the-licence-split-and-the-suite.md states the boundary over
+# artefacts rather than over paths, deliberately, so that it does not decide the
+# layout in passing. The half that would refuse a source file carrying the wrong
+# licence header, or none, is a shape this machinery cannot decide at all: every
+# leg here hands a pattern to git grep, and a missing header is an absence rather
+# than a match. That is established in 0100 rather than suspected here, and it
+# puts the header half beside the two parts of the copy-or-patch rule above,
+# which are absent for the same kind of reason rather than for want of code.
 
 id: no-absolute-home-path
 pattern: ([A-Za-z]:\\Users\\|/home/[A-Za-z0-9._-]+/|/Users/[A-Za-z0-9._-]+/)
