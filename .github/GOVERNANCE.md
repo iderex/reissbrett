@@ -29,6 +29,7 @@ that produced it:
 
     git ls-tree -r --name-only origin/main docs/decisions
     docs/decisions/0003-a-layer-over-the-existing-suite.md
+    docs/decisions/0004-where-the-layer-attaches.md
     docs/decisions/0005-the-pinned-suite-version.md
     docs/decisions/0006-what-a-version-of-a-model-is.md
     docs/decisions/0007-the-collaboration-model.md
@@ -38,6 +39,7 @@ that produced it:
     docs/decisions/0012-where-the-nearest-projects-fall-short.md
     docs/decisions/0013-the-bar-for-a-coherent-workflow.md
     docs/decisions/0037-the-process-boundary.md
+    docs/decisions/0100-the-licence-split-and-the-suite.md
     docs/decisions/prior-collaboration-attempt.md
 
 The file without a number is a study rather than a decision. It records what an
@@ -59,15 +61,16 @@ Every change starts as an issue and lands as a pull request. `CONTRIBUTING.md`
 states it and the ruleset on `main` refuses a direct push:
 
     gh api repos/iderex/reissbrett/rulesets/20485819 --jq '{enforcement, bypass: .bypass_actors, rules: [.rules[].type]}'
-    {"bypass":[],"enforcement":"active","rules":["deletion","non_fast_forward","pull_request"]}
+    {"bypass":[],"enforcement":"active","rules":["deletion","non_fast_forward","pull_request","required_status_checks"]}
 
 The bypass actor list is empty, so the account that owns the repository goes
 through a pull request as well.
 
-That output names no status check. The checks in `.github/workflows/` run and
-go red, and none of them stands between a change and the mainline today.
-`.github/required-status-checks.md` is the authority for which names have
-actually run, and #128 is the issue that holds the change to the ruleset.
+Status checks are among the rules, and which names are required is not repeated
+here, because a list in a document drifts against the setting it describes and
+no commit can hold what a setting says. `.github/required-status-checks.md`
+carries each name beside the run it was read back from, with the command that
+reads the ruleset itself.
 
 ## Disagreeing with a decision
 
@@ -97,15 +100,22 @@ that case is what the licence already gives you, which is the right to take the
 code and carry on under the same terms. `LICENSE` is the GNU Affero General
 Public License version 3.
 
-## There is no code of conduct here yet
+## The code of conduct, and what is not established about its route
 
-This document does not stand in for one. #106 is where it is being added, and
-the missing input is the address a report would be sent to.
+There is one, at `.github/CODE_OF_CONDUCT.md`, and the platform reads it as the
+standard text rather than as a file with a familiar name:
+
+    gh api repos/iderex/reissbrett/community/profile --jq '.files.code_of_conduct | {key, html_url}'
+    {"html_url":"https://github.com/iderex/reissbrett/blob/main/.github/CODE_OF_CONDUCT.md","key":"contributor_covenant"}
+
+It publishes an address for a report. What is not established is that a message
+sent to that address arrives anywhere or is read by anybody. Nothing in this
+repository or on the platform shows that, no message has been sent through it,
+and #106 stays open on exactly that condition. Treat the address as the route
+this project intends rather than as a route somebody has watched work. That is
+a gap and it should not be read as anything else.
 
 Do not send a conduct report through the private security advisory route in
 `.github/SECURITY.md`. That route exists so a vulnerability is not public
 before it is fixed. A conduct report is not a vulnerability, it produces no
 advisory, and sending one there would have it handled as something it is not.
-
-Until an address is published, this repository offers no private route for a
-conduct report. That is a gap and it should not be read as anything else.
