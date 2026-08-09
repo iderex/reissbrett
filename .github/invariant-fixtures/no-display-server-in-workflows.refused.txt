@@ -1,0 +1,22 @@
+Fixture: every indented line below has to be refused by the rule
+no-display-server-in-workflows in .github/invariants.txt.
+
+The lines are workflow steps rather than a whole workflow, because the rule is a
+pattern over the text of a file in .github/workflows/ and not a reading of the
+YAML. This file sits outside that directory, so it is never scanned as part of
+the tree and GitHub never tries to run it.
+
+    - run: sudo apt-get install -y xvfb
+    - run: sudo apt-get install -y XVFB
+    - run: Xvfb :99 -screen 0 1280x1024x24 &
+    - run: sudo apt-get install -y xorg
+    - run: export DISPLAY=:99
+    - run: echo "WAYLAND_DISPLAY is $WAYLAND_DISPLAY"
+
+The casings are the point of the first three. A package name typed in the case
+somebody happens to use is the same step, and a rule matching one spelling of it
+is a rule that a different keyboard walks through.
+
+Everything else in this file is prose the rule has to match none of, which the
+run asserts by comparing the line numbers that matched against the line numbers
+that are indented.

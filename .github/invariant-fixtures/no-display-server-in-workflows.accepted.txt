@@ -1,0 +1,17 @@
+Fixture: the rule no-display-server-in-workflows in .github/invariants.txt has
+to match nothing in this file.
+
+Each line is what a workflow legitimately says near the thing the rule refuses.
+The second is the one the effort went into: written as the bare word instead of
+the word followed by an assignment, the rule would refuse a job output whose
+name happens to contain it, and a rule that reds a workflow for naming a
+variable is a rule somebody deletes rather than argues with.
+
+    - run: echo "This job installs no display server and starts none."
+    - name: DISPLAY_NAME is a job output and not a screen
+    - run: echo "The runner image already carries a server on its PATH."
+    - run: echo "$XDG_RUNTIME_DIR"
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+The third line is the sentence somebody writes while explaining why this rule
+stops where it does, and it would be unfortunate if writing it were refused.

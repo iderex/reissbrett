@@ -1,0 +1,21 @@
+Fixture: the rule no-absolute-home-path in .github/invariants.txt has to match
+nothing in this file.
+
+Each line below is the legal way to write the line above it in the refused
+fixture, and each sits close enough to it that a rule written slightly too wide
+would take it. A rule that refuses the correct spelling beside the violation is
+a rule whoever meets it turns off, and then it refuses nothing at all.
+
+    %USERPROFILE%\src\reissbrett\notes.md
+    $HOME/src/reissbrett/notes.md
+    ~/src/reissbrett/notes.md
+    /usr/local/share/reissbrett/notes.md
+    ./docs/decisions/0005-the-pinned-suite-version.md
+
+The last two are the ones worth having. An absolute path that is not somebody's
+home directory is legal, and so is a path relative to the repository root, and a
+rule reaching for either would be red on the day it landed.
+
+Two more spellings that carry the word without carrying a path: the home
+directories live under /home on Linux and under /Users on macOS, and neither of
+those is followed by an account name here.

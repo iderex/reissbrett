@@ -1,0 +1,57 @@
+# The invariants a pattern search can refuse.
+#
+# This file is the authority for which rules exist. The workflow at
+# .github/workflows/greppable-invariants.yml supplies the machinery that decides
+# each one and nothing else: a rule is added by adding a record here, so that
+# adding a rule is a change somebody reads rather than an edit inside a script.
+#
+# Record format. A record ends at a line holding only three dashes. A line
+# starting with # is a comment and a blank line is ignored. Every field is one
+# line, and its value is everything after the first colon followed by a space,
+# so a pattern that needs a literal colon before a space writes that space as
+# the bracket expression [ ] instead.
+#
+# The fields, all four required:
+#
+#   id       a stable name. It is printed in every verdict and it is what the
+#            two fixture files are named after, so renaming it without renaming
+#            them fails the run rather than silently dropping the rule.
+#   pattern  a POSIX extended regular expression, handed to git grep -E.
+#   scope    one git pathspec saying where the rule applies. The fixture
+#            directory is excluded from every scan by the workflow, because the
+#            fixtures hold the violation on purpose.
+#   reason   the failure this rule prevents, and where the rule stops.
+#
+# Every rule carries two fixtures, and the run refuses a rule that is missing
+# either one:
+#
+#   .github/invariant-fixtures/<id>.refused.txt
+#       Every line indented by four spaces is a violation and the pattern has to
+#       match it. The run compares the set of line numbers the pattern matched
+#       against the set of indented line numbers and requires them to be equal,
+#       so a rule that lost one of its alternatives fails here instead of going
+#       quietly green over a clean tree.
+#
+#   .github/invariant-fixtures/<id>.accepted.txt
+#       The near miss. Legal text sitting one token away from the violation, and
+#       the pattern has to match none of it. A rule that also refuses the legal
+#       thing beside the violation is a rule whoever meets it turns off.
+#
+# What is not here yet, so an empty file is not read as a complete one. #91
+# names six rules. Four of them are about code and this tree holds none, so they
+# arrive with the thing they are about: the copy-or-patch rule with #4, the
+# import rule with the units #37 separates, the pinned-version rule once there
+# is a unit that depends on the version rather than a document quoting it, and
+# the vocabulary rule with #63's list.
+
+id: no-absolute-home-path
+pattern: ([A-Za-z]:\\Users\\|/home/[A-Za-z0-9._-]+/|/Users/[A-Za-z0-9._-]+/)
+scope: .
+reason: A path inside somebody's home directory exists on one machine. In a document it sends a reader somewhere they do not have, and in a pasted command it makes the output impossible to reproduce, which is the defect class this board counts. Write $HOME, a tilde, %USERPROFILE% or a path relative to the repository root. The drive letter is matched in either case, because a lowercase one is the mistake that gets past a reader.
+---
+
+id: no-display-server-in-workflows
+pattern: ([Xx][Vv][Ff][Bb]|[Xx]org|DISPLAY=|WAYLAND_DISPLAY)
+scope: .github/workflows/
+reason: A step that installs, starts or points at a display server makes the headless requirement in #31 a preference. Where this rule stops is worth more than what it covers: it reads the workflow files, so it refuses a display server that is declared in one, and it does not reach a test process that starts its own. The image already carries a server on its PATH, which #31 measured, so the second half needs a check over what the test process did and it is #31's rather than this file's.
+---
