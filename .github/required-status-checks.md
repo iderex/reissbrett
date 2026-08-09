@@ -196,6 +196,14 @@ The six names above went in as one act against a list that was already complete.
 That is available once. From here a name arrives on its own and is argued on its
 own, and the issue that brings it is the only place that reading happens.
 
+PROSE, NOT ENFORCEMENT, for both rules in this section, and no issue on this
+board owes a mechanism for either. A ruleset is a repository setting, so no
+commit can hold what it requires and nothing in this tree can compare the two.
+Whether an issue answered a question is a judgement about an issue body, and
+nothing in this repository reads one. What stands behind both sentences is a
+person reading a pull request, and saying so is the whole of what this mark
+does.
+
 M1 has gates that are not built. #17 owes a format and a lint check, #19 owes a
 unit test check, and #21 owes a restore that refuses a stale lock. Each of them
 fixes its own check run name, adds its row here when it lands, and says whether
