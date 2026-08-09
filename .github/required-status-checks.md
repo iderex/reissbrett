@@ -97,6 +97,32 @@ Emitted by `.github/workflows/text-determinism.yml`. It runs on `push` to every
 branch and on `pull_request` against every base branch, so it is capable on
 every pull request. Nothing fails if it is required today.
 
+### Enforce greppable invariants
+
+Emitted by `.github/workflows/greppable-invariants.yml`. It runs on `push` to
+every branch and on `pull_request` against every base branch, so it is capable
+on every pull request. Nothing fails if it is required today.
+
+This row is read back from a different pull request than the rest, because it
+did not exist when #125 ran. Pull request #140, at head
+`f1d0295d57bb09717ad637cc19266beaca82b213`:
+
+    gh api repos/iderex/reissbrett/commits/f1d0295d57bb09717ad637cc19266beaca82b213/check-runs --jq '.check_runs[] | "\(.name) || app=\(.app.slug)"' | sort -u
+    Audit workflows (zizmor) || app=github-actions
+    DCO sign-off || app=github-actions
+    dependency-review || app=github-actions
+    Enforce greppable invariants || app=github-actions
+    Reject Trojan Source Unicode || app=github-actions
+    Text encoding and line endings || app=github-actions
+    zizmor || app=github-advanced-security
+
+What it costs to require: a pull request that carries a tracked file matching
+one of the rules in `.github/invariants.txt` cannot be merged. What it costs
+that the other rows do not is that the rules are data, so requiring this name
+requires whatever that file says on the day the merge happens, and a rule added
+there lands with the same weight as one argued here. That is the point of the
+file and it is worth seeing before the name is required rather than after.
+
 ## The names that must not be required, and why
 
 ### Scorecard analysis
