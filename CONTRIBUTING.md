@@ -16,9 +16,11 @@ the command that runs it, and #16 owes the build from a clean checkout. Until
 those land, a push is the first moment anything is checked.
 
 Whether a check is a condition of the merge is a separate question from whether
-it runs, and today the answer is that it is not: the ruleset on `main` requires
-a pull request and names no status check. `.github/required-status-checks.md`
-holds the list and the state, with the commands that read it.
+it runs, and this file does not answer it. What the ruleset on `main` requires
+is a repository setting, so no commit holds it and nothing here can go red when
+a sentence about it stops being true. `.github/required-status-checks.md` is
+where the required names are kept, each beside the run it was read back from,
+with the command that reads the ruleset itself.
 
 ## No work without an issue
 
@@ -130,9 +132,18 @@ the platform rather than against your clone:
 PROSE, NOT ENFORCEMENT for the signature. The ruleset on `main` does not require
 verified signatures, so nothing refuses an unsigned commit today. #97 is the
 issue that owes it, and `docs/verified-signatures.md` is where the request, its
-cost and what happens to work already on branches are written down. The sign-off check is a different case: it runs and it goes
-red, but it is not yet a required check, so a red DCO run does not by itself
-stop a merge. `.github/required-status-checks.md` is where that changes.
+cost and what happens to work already on branches are written down.
+
+The sign-off is the other case, and it is worth the space because it is the
+check most likely to be red on a first contribution. A red DCO run stops the
+merge on its own. Read that rather than take it from here, because it is a
+setting and this file cannot hold it:
+
+    gh api repos/iderex/reissbrett/rulesets/20485819 --jq '[.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context] | index("DCO sign-off") != null'
+    true
+
+`.github/required-status-checks.md` carries that name with the run it was read
+back from, and the same for every other name the ruleset requires.
 
 ## Commit messages
 
