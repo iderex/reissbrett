@@ -1,0 +1,24 @@
+Fixture: the rule no-suite-source-clone-in-workflows in .github/invariants.txt
+has to match nothing in this file.
+
+Each line is what a workflow legitimately says near the thing the rule refuses.
+Every one of them names the suite's repository, because naming it is not the
+violation and a rule that reads the name as the violation refuses most of what
+this project has to do.
+
+    - run: gh api repos/FreeCAD/FreeCAD --jq '.license.spdx_id'
+    - run: gh api repos/FreeCAD/FreeCAD/contents/src/Mod?ref=1.1.3
+    - run: gh release download 1.1.3 --repo FreeCAD/FreeCAD --pattern '*.AppImage'
+    - run: git clone https://github.com/iderex/reissbrett.wiki.git
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+          repository: iderex/reissbrett
+
+The third line is the one the effort went into. #11 decided that the bundle is
+the product and that it ships the suite's published artefact unchanged, so a
+step that downloads a release is the delivery form working as decided. #4 says
+the same thing from the other side: fetching a release artefact and shipping it
+unchanged is not the act the rule refuses. A rule that reds that step reds #108.
+
+The fourth line reaches for the git command against something that is not the
+suite, and the sixth reaches for the checkout input against this project's own
+tree. Both are one token away from a refused line above.

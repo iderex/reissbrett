@@ -1,0 +1,27 @@
+Fixture: every indented line below has to be refused by the rule
+no-suite-source-header in .github/invariants.txt.
+
+This file is excluded from the scan of the tree, because it holds the violation
+on purpose. What it proves is that the rule still bites, which nothing else in
+the run would notice: the tree is clean either way, so a pattern that lost an
+alternative would go green over it.
+
+The lines are the banner an upstream source file carries, in both of the comment
+styles the suite writes it in, read at the version #5 pins. The accented name in
+the upstream copyright line is not reproduced, because the rule does not read it
+and a fixture carries nothing it does not need.
+
+    *   This file is part of the FreeCAD CAx development system.              *
+    # *   This file is part of the FreeCAD CAx development system.            *
+    *   for detail see the LICENCE text file.                                 *
+    # *   for detail see the LICENCE text file.                               *
+
+The second alternative is the one the effort went into. Not every file upstream
+carries the first sentence: the machining module's Python files, which are the
+ones this project would be most tempted to lift from, carry the licence line and
+not the sentence. A rule written to the sentence alone walks past exactly the
+directory it most needs to cover.
+
+Every other line in this file is prose and the rule has to match none of it,
+which the run also asserts: it compares the line numbers that matched against
+the line numbers that are indented and requires the two sets to be equal.
