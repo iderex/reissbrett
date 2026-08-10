@@ -193,11 +193,30 @@ processor is selected by the machine profile in #73, so a shop can be running
 two of them against one release, and a number that covers the release cannot
 also cover which one they chose.
 
-Federation between two operators' servers is entry 6 of #1, it is open, and
-this policy covers a client and a server under one operator. If that entry is
-ever answered in the direction of federation, this document gains a section
-about a version boundary between servers rather than having one of its rules
-rewritten.
+Federation between two operators' servers is entry 6 of #1, and this policy
+covers a client and a server under one operator. The sentence here said that
+entry was open. It is answered, against federation: a project lives on one
+operator's server and stays there. Two comments carry the answer:
+
+    gh api repos/iderex/reissbrett/issues/1/comments --jq '.[] | select(.body | test("(?m)^## Eintrag 6")) | "\(.created_at) \(.html_url)"'
+    2026-08-08T23:25:01Z https://github.com/iderex/reissbrett/issues/1#issuecomment-5228697727
+    2026-08-09T04:11:22Z https://github.com/iderex/reissbrett/issues/1#issuecomment-5229707199
+
+That answer removes nothing from this policy and adds nothing to it, which is
+why the correction is to the state of the entry rather than to a rule. The
+reserved section stays reserved on the same terms: the answer declines to build
+federation and declines to foreclose it, so if it is ever reopened in the other
+direction this document gains a section about a version boundary between servers
+rather than having one of its rules rewritten.
+
+One thing the two comments above do not say the same way, and this policy is
+where it would land. The earlier one puts a cost on the protocol, that version
+negotiation carries a server identity the first release does not otherwise need.
+The later one says the protocol is not built for federation and treats a second
+set of identity questions as the cost the first release avoids. Whether the
+negotiation in #48 carries a server identity is therefore not settled by entry 6
+as it stands, and this policy states no field of that negotiation, so nothing
+here depends on which reading holds. #48 is where it would.
 
 ## What refuses any of this today
 

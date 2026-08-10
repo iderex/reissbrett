@@ -151,9 +151,36 @@ operator can actually read.
 
 Whether this project's own code and the redistributed suite are one combined
 work or an aggregation is a licensing question this document does not answer.
-It is entry 2 of #1, it is open, and the bundle is precisely what makes it
-concrete rather than theoretical. Nothing here decides it in either direction,
-and #100 is where the answer lands when it is given.
+It is entry 2 of #1, and the bundle is precisely what makes it concrete rather
+than theoretical. Nothing here decides it in either direction.
+
+This paragraph said the entry is open and that #100 is where the answer lands
+when it is given. The entry is answered and the answer has landed. It is a
+split, the server under AGPL-3.0 and the extensions under LGPL-2.1, which is the
+licence of the process they load into:
+
+    git ls-tree -r --name-only origin/main -- docs/decisions/0100-the-licence-split-and-the-suite.md
+    docs/decisions/0100-the-licence-split-and-the-suite.md
+
+That document reads the question this paragraph raises against each of the three
+routes named above rather than against the delivery form as a whole, and it
+reaches the bundle by name. The bundle carries the extensions, which are
+LGPL-2.1, and it does not carry the AGPL-3.0 server, so the combination this
+paragraph was worried about is not in it. What the bundle owes is the
+redistribution obligations already named above, which are owed either way.
+
+What that changes here is nothing, and it is worth saying which nothing. The
+delivery form is unaffected, the platforms are unaffected, and the relationship
+to the pin is unaffected. Reading the answer as a reason to revisit the delivery
+form would be reading it backwards: the split was chosen so that the bundle does
+not have to be argued, not the other way round.
+
+Two things #100's analysis says about itself carry over rather than being
+restated here. It is an engineering reading of licence texts and not legal
+advice, and nobody qualified to give any has read it. And it depends on the
+suite's files at the pinned version carrying an "or later" permission, where
+five were read and thousands were counted, which is a gap that document names
+and does not close.
 
 ## What builds this
 
