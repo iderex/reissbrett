@@ -9,9 +9,9 @@ The reason is not tidiness. A mixed suite reports one number, and that number is
 read as covering everything in it, while the hardware tests skipped on every
 machine that ran it. That is a run reporting a pass it did not earn.
 
-This document is the fourth of #32's conditions. It says what belongs in the
-harness, and it states the rule for adding something so that the harness does
-not become the place hard tests go.
+This document carries the second and fourth of #32's conditions. It says what
+the harness is called and why, what belongs in it, and the rule for adding
+something so that the harness does not become the place hard tests go.
 
 ## Nothing here has been built
 
@@ -73,10 +73,61 @@ A test may use hardware that happens to be present without needing it. If it
 passes on a machine without that hardware, it belongs in the ordinary suite and
 the hardware is an accident of where it ran.
 
+## What it is called
+
+The name is **hardware**, and the ordinary suite says the hardware harness was
+not run.
+
+#32 asks for a name that states what the harness requires rather than one that
+sounds like the other suite, and the three classes above have exactly one thing
+in common: each needs something the machine running the ordinary gate does not
+have. A cutting machine, a graphics driver and a device are all hardware, so the
+word covers the contents without being wider than them, and somebody reading a
+run that says the hardware harness was not run knows immediately what would have
+to be true for it to have been.
+
+It is also already the word this tree uses for the thing, in a document that
+landed before this one:
+
+    git grep -n 'hardware harness' 97fe583739e2a2afb0391d3202180bb9399ed11f -- docs/ | grep -v hardware-harness.md
+    97fe583739e2a2afb0391d3202180bb9399ed11f:docs/release-readiness-checklist.md:40:### 2. The hardware harness has run against a real machine
+
+Choosing anything else would have made that line wrong, and a name chosen here
+that contradicts a landed checklist is a name somebody has to reconcile later.
+
+### What was rejected, and why
+
+**machine.** It names the class the separation exists for and not the harness.
+The graphics driver and the device classes would sit in a suite named after
+something they are not, which is how a name stops being read.
+
+**integration.** It names a tier rather than a requirement. This is the name
+under which a mixed suite becomes the place hard tests go, because nothing in
+the word says a test must need something to belong, and #32 exists to prevent
+exactly that.
+
+**e2e, or system.** Both say where a test sits in a hierarchy. A test that
+drives the whole committed path headless through the runner in #30 is end to end
+and belongs in the ordinary suite, so either name would put it in the wrong
+place on its first day.
+
+**slow.** A symptom rather than a requirement. A hardware test that finishes in
+a second still needs hardware, and a headless test that takes ten minutes still
+belongs in the ordinary gate.
+
+**manual.** Wrong about the facts. These runs are automated where the hardware
+is, and the word invites somebody to substitute a person's judgement for a run,
+which is the opposite of what #78 records.
+
+**optional.** The most damaging of the six. It says the tests may be skipped,
+which is precisely the reading #32 exists to refuse, and it would put that
+reading in the name itself.
+
 ## What this rule does not decide
 
-It does not say what the harness is called, which is #32's second condition and
-a decision about the name rather than about the contents.
+The name above is the word, not the command. What a person types to run either
+suite is one command per surface from #16, in a layout #15 has not decided, and
+naming a command here would decide both in passing.
 
 It does not say what the ordinary suite prints when this harness was not run,
 which is #32's third condition, or what the harness does when it is run with no
@@ -93,8 +144,10 @@ cases.
 The half about invocation is decidable. #32's first condition is that the
 harness has its own command and that no pull request check calls it, and that is
 a property of workflow files and a name, which is the shape `.github/invariants.txt`
-already holds records for. No record there covers it today, because there is no
-harness and no command to name.
+already holds records for. No record there covers it today, and the name decided
+above does not change that: a record in that file is a pattern over what a
+workflow says, and what it would have to look for is the command, which #16 has
+not written.
 
 The half this document is mostly about is not decidable by anything. Whether a
 test could have been written headless is a claim about a version of the test
