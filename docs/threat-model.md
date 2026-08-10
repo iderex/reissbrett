@@ -185,10 +185,33 @@ named here so that the derived list above is not read as the whole set. #45
 decides what is never stored, which is the strongest control there is against
 the confidentiality item and works by not holding the data. #82 logs what
 happened without logging what was modelled, which is the same idea applied to a
-different file. #86 keeps telemetry off unless an operator switches it on. All
-three are labelled for where they land rather than for what they defend, and
-each traces to the confidentiality item rather than to a threat actor, which is
-why they read as legal or operational issues on the tracker.
+different file. #86 is telemetry, and what it carries is an absence rather than
+a default. All three are labelled for where they land rather than for what they
+defend, and each traces to the confidentiality item rather than to a threat
+actor, which is why they read as legal or operational issues on the tracker.
+
+The sentence about #86 said something weaker when this document landed: that
+telemetry is kept off unless an operator switches it on. That is not the
+position. The decision on #1 is that there is none at all, with nothing
+collected, nothing sent and no opt-in, stated there without exception and
+without a later review:
+
+    gh api repos/iderex/reissbrett/issues/1/comments --jq '.[] | select(.created_at=="2026-08-08T21:10:03Z") | .html_url'
+    https://github.com/iderex/reissbrett/issues/1#issuecomment-5228180864
+
+The difference belongs in this document rather than only on #86, because the two
+are different controls. A default is a setting, and a setting is something an
+operator has to find, something a later release can move, and something this
+document would have to trace to whoever can change it. A feature that is not
+built has none of those, and the confidentiality item is defended here by the
+second one.
+
+What this correction does not do is turn the weaker sentence into an assurance.
+Nothing here was measured. There is no software to observe, and #86's own
+condition asks for the outbound requests of the delivery form to be enumerated
+by watching it run, including the ones made by components this project did not
+write. Until that happens the paragraph above records a decision and not a
+behaviour, and #102 is where the enumeration is owed rather than here.
 
 ## What this document does not settle
 
