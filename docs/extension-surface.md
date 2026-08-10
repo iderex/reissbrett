@@ -373,23 +373,58 @@ project has no such feature in the committed path.
 
 ## What refuses any of this today
 
-Nothing. There is no unit to check, and neither of the two mechanisms that would
-carry these rules holds one yet.
+One of the seven entries above, in part. The other six are refused by nothing,
+and there is still no unit to check.
+
+This section said nothing refuses any of it, beside a command returning two
+rules. That was true when this note landed and stopped being true about two
+hours later, on the same day, when the copy-or-patch rule arrived in the rules
+file. The command now returns four:
 
     git show origin/main:.github/invariants.txt | grep -cE '^id: '
-    2
+    4
+    git show origin/main:.github/invariants.txt | grep -E '^id: '
+    id: no-absolute-home-path
+    id: no-display-server-in-workflows
+    id: no-suite-source-header
+    id: no-suite-source-clone-in-workflows
 
-The two rules that exist are an absolute home path and a display server in a
-workflow file, and neither is about this note. The import half belongs to #98,
-which has landed nothing, and the header pattern half belongs to #91, whose own
-rules file names the copy-or-patch rule as arriving with #4.
+The first two are an absolute home path and a display server in a workflow file,
+and neither is about this note. The other two are, and they are the entry this
+note delegates to `0004`: never carry a copy of or a patch against the suite.
+One refuses the banner a file lifted out of the suite's source tree keeps, and
+one refuses a workflow step that fetches that source and builds from it.
 
-PROSE, NOT ENFORCEMENT for every rule in this document, issues #91 and #98. The
-permission list is the kind of rule a machine could refuse once there are units,
-and the entries about what must never be done to a document are not: no reading
-of this tree decides whether a call left a document in a state it should not be
-in. The first half is owed a mechanism. The second half is a rule that ends
-where it is written, and marking it does not change that.
+What that does not reach matters more here than what it reaches, because this
+section is where somebody decides how much to trust the note. Both are patterns
+over the text of tracked files, so `0004`'s own residual is untouched: a file
+copied out of the suite and stripped of its banner matches neither of them, and
+deciding that case needs a comparison against the upstream tree at the pinned
+tag. The rules file says so at the rule rather than only here. So the entry is
+refused in the two halves a content search decides and is not refused in the
+half that would catch somebody who took the banner off.
+
+The other six entries are refused by nothing at all. The import half belongs to
+#98, which has landed nothing, and nothing in the rules file is about writing
+into a document, assigning to an internal name, modifying a file the suite has
+open, calling `purgeTouched`, reaching into a private path, or loading the suite
+in the listening process:
+
+    git show origin/main:.github/invariants.txt | grep -cE 'purgeTouched|internal name|private path|listening process'
+    0
+
+PROSE, NOT ENFORCEMENT for every rule in this document except the two halves of
+the copy-or-patch entry named above, issues #91 and #98. The permission list is
+the kind of rule a machine could refuse once there are units, and the entries
+about what must never be done to a document are not: no reading of this tree
+decides whether a call left a document in a state it should not be in. The first
+half is owed a mechanism. The second half is a rule that ends where it is
+written, and marking it does not change that.
+
+The exception is one entry and two patterns, and it is written as an exception
+rather than as a reduction of the mark, because a mark that quietly stops
+covering things is worse than one that covers too much. Everything the two
+patterns do not see is still inside the mark, `0004`'s residual first.
 
 ## What this note does not settle
 
