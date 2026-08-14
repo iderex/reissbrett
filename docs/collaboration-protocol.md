@@ -542,7 +542,7 @@ Three conditions, each checkable.
 
 If the maintainer answers the open field above in favour of a server identity in
 the negotiation, it is added, the protocol version does not move because nothing
-has been built yet, and this document records the answer rather than assuming it.
+has been built yet, and the answer is written down here and not assumed.
 
 If #117's measurements show the control channel is a measurable cost at the size
 of deployment this release supports, the encoding is argued again against those

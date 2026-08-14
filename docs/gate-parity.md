@@ -12,9 +12,8 @@ company's designs. Some of the reference does not apply here, and some of what
 this project needs is not there at all. Both directions are deviations and both
 owe a reason.
 
-This document records the deviations. It does not hold the list of literal check
-run names that the branch should require, because that list already has an
-owner: `.github/required-status-checks.md` is the authority, every row in it
+The deviations are below. The list of literal check run names the branch should
+require is not here, because that list already has an owner: `.github/required-status-checks.md` is the authority, every row in it
 names the run the name was read back from, and a second list here would drift
 against it. Where this document needs a name, it points there.
 

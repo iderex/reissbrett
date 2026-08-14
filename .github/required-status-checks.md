@@ -39,10 +39,10 @@ the bypass list is empty, both shown by the same command rather than asserted
 beside it.
 
 Before this, every gate this repository had built was advisory: it ran, it went
-red, and the merge button stayed green. That is what changed. What it costs is
-the failure this file exists to prevent, now live rather than hypothetical: a
-required name that no run produces blocks every merge until somebody with
-settings access changes the ruleset back, and no commit can undo it.
+red, and the merge button stayed green. That is what changed. What it costs is now live and no longer
+hypothetical: a required name that no run produces blocks every merge until
+somebody with settings access changes the ruleset back, and no commit can undo
+it.
 
 ## The names
 
@@ -155,8 +155,8 @@ So this check never runs on a pull request, and it has never run on one:
     0
 
 Requiring it would block every merge on this repository forever, with no way to
-make the required check appear short of changing the ruleset back. This is the
-exact failure this file exists to prevent, and it is one name away.
+make the required check appear short of changing the ruleset back. That is the failure the rows below are written
+against, and it is one name away.
 
 ### zizmor
 
