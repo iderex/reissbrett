@@ -1,10 +1,9 @@
 # Verified signatures on the protected branch
 
-This document records a request, its reasoning and its cost. It changes no
-repository setting. It exists so that when somebody changes the ruleset, the
-change is made against something written down rather than from memory, and so
-that the reasons can be argued with before that happens rather than
-reconstructed afterwards.
+Below are a request, the reasoning behind it and what it costs. No repository
+setting changes here. Somebody changing the ruleset can work from this instead
+of from memory, and can argue with the reasons before the change and not
+reconstruct them afterwards.
 
 ## The correction this is written after
 

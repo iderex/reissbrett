@@ -1,7 +1,7 @@
 # Line endings and text classification for every tracked file.
 #
-# The rule this file exists for: what is stored in git and what a fresh checkout
-# writes must not depend on which platform the checkout happens on. M3 stores
+# The rule: what is stored in git and what a fresh checkout writes must not
+# depend on which platform the checkout happens on. M3 stores
 # model data and compares it byte for byte, so a fixture rewritten in transit is
 # a fixture that proves nothing, and the failure surfaces as a store test that
 # passes on one machine and fails on another.
