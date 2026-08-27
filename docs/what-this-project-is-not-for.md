@@ -84,13 +84,18 @@ wording and belongs there. This document does not write it in advance.
 
 ## Where this project's claims stop
 
-The readme claims a workflow, an interface, collaboration and versioning, and
-that the work stays on the operator's own hardware:
+The readme claims a workflow, collaboration and versioning, and that the work
+stays on the operator's own hardware:
 
     git show origin/main:README.md | sed -n '3p'
-    A distribution and orchestration layer over the open modular CAD suite that gives a continuous, beginner-friendly workflow (sketch to feature to drawing to CAM) with a stable UI and team collaboration and versioning. It runs on your own hardware; the models and the project history never leave it.
+    A distribution and orchestration layer over the open modular CAD suite that adds a guided path through one workflow (sketch to feature to drawing to CAM), with team collaboration and versioning. It runs on your own hardware; the models and the project history never leave it.
 
 Those are the claims. Outside them:
+
+The readme holds two things out of that sentence deliberately. Whether the guided
+path is usable by somebody new to CAD, and whether the interface stays consistent
+along it, are named there as intentions with no measurement behind them, so
+neither is a claim this document has to place a limit on.
 
 This project implements no geometry kernel, no constraint solver and no
 toolpath generator, which `.github/SECURITY.md` already says in its own words
