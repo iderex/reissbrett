@@ -34,7 +34,7 @@ exactly that reason.
 says where the answer has to come from:
 
     git grep -n 'from one decision point' origin/main -- docs/collaboration-protocol.md
-    origin/main:docs/collaboration-protocol.md:487:#50 answers `not-permitted` from one decision point, and the protocol offers no
+    origin/main:docs/collaboration-protocol.md:598:#50 answers `not-permitted` from one decision point, and the protocol offers no
 
 `docs/threat-model.md` names what this model does not defend against, and it is
 the operator's own administrator. Nothing below narrows that.
@@ -214,7 +214,7 @@ can, by an administrator, and by nobody else. The holder is told, and the wire
 carries which of the two reasons it was:
 
     git grep -n 'or an administrator took it' origin/main -- docs/collaboration-protocol.md
-    origin/main:docs/collaboration-protocol.md:250:expired or an administrator took it. Carries which of those it was, and who did
+    origin/main:docs/collaboration-protocol.md:335:expired or an administrator took it. Carries which of those it was, and who did
 
 The act is recorded in the audit trail, which is #58, and the holder's local work
 is untouched, because the claim governs who may publish rather than who may keep

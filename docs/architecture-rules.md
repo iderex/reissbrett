@@ -100,7 +100,7 @@ From #50. Argued in `docs/decisions/0050-the-permission-model.md`, which names #
 as what refuses a second route:
 
     git grep -n 'refuses an operation that does not pass' origin/main -- docs/decisions/0050-the-permission-model.md
-    origin/main:docs/decisions/0050-the-permission-model.md:268:#98 refuses an operation that does not pass through the decision point, and #20
+    origin/main:docs/decisions/0050-the-permission-model.md:298:#98 refuses an operation that does not pass through the decision point, and #20
 
 ### A6. A test uses a fixture rather than generating a document
 

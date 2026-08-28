@@ -10,9 +10,11 @@ It decides the client side. The server's own configuration is #80, the operator
 meets it in the compose example in #109, and who a person is once the connection
 stands is #49 rather than this.
 
-Nothing in the tree covered this before:
+Nothing in the tree covered this before. The commit is named rather than left
+as `origin/main`, because the mainline now carries this document and the command
+finds it:
 
-    git grep -niE 'TLS|transport protection|fingerprint' origin/main -- docs/ README.md .github/ ; echo "exit=$?"
+    git grep -niE 'TLS|transport protection|fingerprint' e38c0cfe9f9186cd10aaa362dda3a054e991d46d -- docs/ README.md .github/ ; echo "exit=$?"
     exit=1
 
 ## The decision
