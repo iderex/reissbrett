@@ -225,6 +225,91 @@ case explicit rather than to make the abrupt case work.
 a reason the client did not ask for, including the account being disabled, which
 #49 requires. The client stops sending anything but `session.begin`.
 
+### Reading
+
+Four requests here, and a fifth under `### Moving parts` below for the bytes.
+How many requests the read side needs, whether listing a project's documents and
+listing a document's versions are one message or two, and whether a client asks
+for parts by name or asks for a version and is told the names, are answered
+below rather than left to whoever writes the first client.
+
+`projects.query`, from the client. Carries nothing. The server answers
+`projects`, carrying every project the person is a member of, each with an
+identifier, a name, and the role the person holds there. A project the person is
+not a member of is absent from the answer. There is no request that names a
+project the person has not been told about.
+
+`documents.query`, from the client. Carries a project. The server answers
+`documents`, carrying every document in that project the person may read, each
+with an identifier, a name, and the identifier of the version that is current for
+it. A document the person may not read is absent rather than refused, for the
+same reason as above: a refusal naming a document is a statement that the
+document exists.
+
+`versions.query`, from the client. Carries a document. The server answers
+`versions`, carrying that document's recorded versions in the order they were
+published, each with its identifier, who published it, when, the message the
+publisher gave, and whether it is the current one. This is the history a viewer
+may read under `docs/decisions/0050-the-permission-model.md`, and it is the list
+#42 compares two entries of.
+
+`version.query`, from the client. Carries a document and a version identifier.
+The server answers `version`, carrying exactly what `publish` carried for that
+version: the ordered list of part names, the container framing
+`docs/decisions/0006-what-a-version-of-a-model-is.md` requires to reassemble the
+file, and the readable description of the feature tree. It refuses with
+`no-such-version` where the document is readable and the identifier is not one of
+that document's versions.
+
+That refusal is worth naming rather than passing over. `no-such-version` has been
+in the closed code set below since this contract was first written, and until
+`version.query` existed no message in the set could produce one. A declared
+refusal that nothing can cause is a hole in the message set with a label on it,
+and this is the message the label was waiting for.
+
+Where a person may not reach a project or a document at all, the answer is
+`not-permitted`, and it is the same answer whether the subject exists or not.
+That is #49's rule about a failed attempt being indistinguishable from a failure
+of a different kind, applied one level up: a caller who cannot reach a thing
+learns nothing about whether it is there. `no-such-document` is therefore only
+ever seen by a caller who could have read the document had it existed, which is a
+caller already holding the project's listing.
+
+#### Why these are four messages and not one
+
+Each answers a different question about a different subject, and the sizes differ
+by orders of magnitude. One message with a field selecting between them would be
+a message whose required fields depend on the value of another field, and this
+contract cannot make that safe: the rule below reads past an unknown field, which
+is only sound while every field's meaning is fixed by the message type alone.
+`write-state.query` is already separate from `notification.query` for the same
+reason, so this is the shape already in use rather than a new one.
+
+#### Why a client is told the part names and then asks for them by name
+
+The alternative is one request that names a version and receives its bytes. It is
+rejected because a part is named by a hash of its content, so a workstation that
+already holds a part - from another version of the same document, from another
+document that shares it, or from the version it published itself - would receive
+it again. `parts.offer` and `parts.wanted` exist so that a client sends only what
+the server lacks, and a read side without the same two steps gives that property
+up in the direction where the file is usually larger.
+
+So reading a version is `version.query` for the names, then `parts.request` under
+`### Moving parts` below for the bytes of the ones the client does not hold. The
+client decides what it holds. The server is never asked.
+
+#### What none of these asks the server to do
+
+None of them asks the server to open a document. Every field above is either
+metadata the server recorded when a version was published or bytes it stored
+under a name, and `docs/decisions/0037-the-process-boundary.md` is untouched by
+all four: the readable description is returned because it was uploaded, not
+because the server produced it, and the container framing is returned for the
+same reason. The section on what this protocol does not do says that a message
+asking the server to open a document would undo that decision in a field, and
+that sentence still holds against every message here.
+
 ### Writing
 
 `write-claim.request`, from the client. Carries the document and, if the client
@@ -290,9 +375,18 @@ route rather than only on disk.
 `transfer.cancel`, from either side, carrying the transfer identifier. Everything
 received for it is discarded.
 
-The same three messages carry a part in the other direction, sent by the server,
-with the client doing the hashing and the refusing. Restoring a version a
-workstation does not hold is that direction.
+`parts.request`, from the client. Carries the names of the parts it wants. The
+server answers `parts.sending`, carrying the subset of those names it holds and
+will send. A requested name missing from that subset is a part the server does
+not hold, and that is an answer rather than a refusal, for the same reason
+`parts.wanted` is one: the client asked about a set, and the useful reply is a
+set.
+
+The same three transfer messages then carry a part in the other direction, sent
+by the server, with the client doing the hashing and the refusing. Restoring a
+version a workstation does not hold is that direction, and `parts.request` is
+what starts it. Before that message existed this paragraph described a direction
+nothing could ask for.
 
 ### Publishing and what follows
 
@@ -434,6 +528,13 @@ possible. And #52's display can say when what it shows was last confirmed,
 because there is a moment it was confirmed at, rather than an assumption that
 nothing has happened since.
 
+A read answer describes the moment the server answered it. `documents`,
+`versions` and `version` are true when they are sent and may be stale when they
+are read, and this contract promises nothing else about them. Two of the three go
+stale in one direction only, because nothing here removes or rewrites a recorded
+version: an answer about a version stays true and a version list can only grow.
+`documents` carries a current version identifier, and that one moves.
+
 What is deliberately not promised: that a notification arrives at all while a
 connection is up, that two clients see a change at the same moment, and that a
 `write-state.changed` a client did not receive means nothing changed.
@@ -460,6 +561,16 @@ that combines two versions.
 It carries no event feed. #58's audit trail is the operator's, it is read and
 exported on the server, and #58 says in its own words that it must not become a
 general event log. Putting it on the wire would be the first step toward one.
+
+It carries no search. `documents.query` and `versions.query` answer with what is
+there, in full, and nothing above takes a query expression. What a search would
+match is a decision nobody has taken, and a field for it here is where it would
+get taken by accident.
+
+It carries no partial read of a part. A part is named by a hash of its bytes, so
+a receiver holding some of them can check nothing, and that check is the whole
+reason the name is a hash. A transfer may still be split across as many payload
+frames as the sender likes, because the receiver checks once at the end.
 
 It carries no telemetry of any kind. #86 decides that, and the absence here is not
 a place a later decision fills in quietly.
@@ -508,6 +619,21 @@ being added by the client.
 
 #57 uses `publish.for-review` and `review.decide`, with the refusal reason as a
 field.
+
+#42 produces its summary on a workstation from what `version.query` returns for
+two versions. The description is stored with the version and the server computes
+nothing, which is `0037` held on this route as well.
+
+#43 restores a version with `version.query` for the names and the framing,
+`parts.request` for the bytes it does not already hold, and the byte comparison
+`0006` states, made where the file is reassembled.
+
+#50's table names a message beside every operation it governs, and its read row
+now has four to name instead of the absence it recorded.
+
+#56 reconciles on reconnect by asking rather than by being told, and the four
+requests above are the asking. The ordering section is what makes that the
+authoritative route.
 
 #59 applies every bound at the frame header, before a body is read, and answers
 `limit` naming which one.
