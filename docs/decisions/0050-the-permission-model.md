@@ -69,7 +69,8 @@ rather than a message invented.
 
 | Operation | Least role |
 | --- | --- |
-| Read a document and its history | viewer |
+| `documents.query`, `versions.query`, `version.query` | viewer |
+| `parts.request`, and the transfer toward the client that follows it | viewer |
 | `write-state.query` | viewer |
 | `write-claim.request`, `write-claim.renew`, `write-claim.release` | contributor |
 | `publish`, `publish.for-review` | contributor |
@@ -82,33 +83,61 @@ rather than a message invented.
 `hello` and `session.begin` ask for no role. They are #49's and they establish who
 is asking, which is what everything above is decided against.
 
-### The read operation has no message to name, and that is the contract's gap
+`projects.query` has no row, and the absence is deliberate rather than an
+oversight. It answers with the projects the person is a member of and names
+nothing else, so what it asks for is membership itself and not a role inside a
+project. Every row above is a role held in one project, and giving this operation
+one would mean inventing a role above the three this document decides. The
+contract states the same limit from its own side: there is no request that names
+a project the person has not been told about.
 
-The first row of that table names no message because the contract declares none.
-The whole message set, read out of the document rather than recalled, carries no
-request that opens a document, lists a project's documents, lists a document's
-versions, or asks the server to send parts:
+### The read operation had no message to name, and this is what changed
 
-    git show origin/main:docs/collaboration-protocol.md | grep -oE '^`[a-z][a-z.-]+`' | grep -cE '\.(open|read|list|fetch|get)`$'
-    0
+WHAT STOOD HERE RECORDED AN ABSENCE, AND THE ABSENCE IS GONE RATHER THAN
+NARROWED. The first row of the table above read "Read a document and its
+history" in prose, because the contract declared no request that opened a
+document, listed a project's documents, listed a document's versions, or asked
+the server to send parts. The transfer messages were specified in both
+directions and only the client's direction had a request that started one, and
+the refusal code `no-such-version` was declared with nothing in the message set
+able to produce it. That was written down here, recorded on #48, and left
+unrepaired on purpose, because inventing a message in this document would have
+decided the contract in passing.
 
-That reads the names the contract introduces at the start of a line, which is
-every message it specifies, and none of them opens, reads, lists or fetches
-anything.
+#48 has since specified them. Read out of the tree this document is in rather
+than recalled, from a checkout of the commit that carries both files:
 
-The transfer messages are specified in both directions and only the client's
-direction has a request that starts one. The refusal code `no-such-version` is
-declared with nothing that could produce it, which is the sharpest form of the
-same absence:
+    grep -oE '^`[a-z][a-z.-]+`' docs/collaboration-protocol.md | grep -E '\.query`$' | sort -u
+    `documents.query`
+    `notification.query`
+    `projects.query`
+    `version.query`
+    `versions.query`
+    `write-state.query`
 
-    git grep -c 'no-such-version' origin/main -- docs/collaboration-protocol.md
-    origin/main:docs/collaboration-protocol.md:1
+    grep -c 'no-such-version' docs/collaboration-protocol.md
+    3
 
-One occurrence, in the closed set of codes, and none in the message set above it.
-So the read permission is stated here against the operation and not against a
-message, and #48 owes the message. That is recorded on #48 rather than repaired
-here, because inventing a message in this document would decide the contract in
-passing.
+    grep -c '^`parts.request`' docs/collaboration-protocol.md
+    2
+
+The first prints the request names the contract introduces at the start of a
+line and keeps the ones that ask a question. Four of the six are new and two,
+`write-state.query` and `notification.query`, were always there. The second
+counts three occurrences of `no-such-version` where there was one: the message
+that now refuses with it, the paragraph saying why that matters, and the closed
+code set where it previously stood alone. The third finds `parts.request`, which
+starts the transfer toward the client that this table's second row governs, at
+its specification and at the line naming it for #43.
+
+So the read permission is stated against messages like every other row, and it
+is the same permission it was: viewer, decided here, unchanged by the contract
+having caught up. What moved is the contract, not this model.
+
+One thing did not move and is worth keeping visible. Nothing refuses any of
+this. The rows above are a requirement on a decision point that does not exist,
+which the section below on what refuses this says at greater length, and a table
+that now names messages is not a table anything checks.
 
 ## The inheritance rule
 
@@ -244,8 +273,9 @@ the property and it is paid knowingly.
 
 ## What this imposes on other issues
 
-#48 owes the read-side request named above, and the permission for it is the first
-row of the table without any further decision here.
+#48 owed the read-side requests named above and has specified them. The
+permission for them is the row it always was, viewer, and the contract added no
+question this model had to answer a second time.
 
 #49 owns what proves who a person is. This model is stated against a person and
 takes no position on how they are identified. Disabling an account is #49's, and
