@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   dco:
-    name: DCO sign-off
+    name: DCO signoff
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
