@@ -318,19 +318,75 @@ Anything about how good a word is. Whether `refinement` is the right word for
 stage 4 is a judgement, and the measurement in #67 with people who have not used
 the suite is what would settle it. Until then it is a choice, not a finding.
 
+## The words this check refuses
+
+This section is data. `.github/workflows/documentation-lint.yml` reads the lines
+below out of this file rather than carrying a copy of them, which is #95's third
+condition, so a word is added to the refusal by editing this document and
+nothing else.
+
+Each line names a word this vocabulary rejected and the term that replaced it. A
+tracked document using the left-hand side reds the check, and the message names
+the right-hand side.
+
+    refuse: revolution -> revolve
+    refuse: NC file -> program
+    refuse: post-processed output -> program
+    refuse: part file -> document
+    refuse: fully dimensioned -> fully constrained
+    refuse: locked down -> fully constrained
+
+This file is the one document the check does not scan, because it is the file
+that has to name the refused words in order to declare them. That exemption is
+in the workflow with the same reason beside it.
+
+## Which rejected words are refusable, and which are not
+
+The list above is shorter than the rejected alternatives named in the tables,
+and the difference is the whole of what this refusal can do rather than an
+oversight.
+
+A rejected word is refusable only where it carries no other meaning in this
+tree. `revolution`, `NC file`, `post-processed output`, `part file`,
+`fully dimensioned` and `locked down` name the concept they were rejected for
+and nothing else, so a pattern that finds one has found the drift.
+
+`file`, `model`, `edit`, `update`, `refresh`, `operation`, `rebuild` and
+`modification` are rejected words and ordinary English in the same tree. A
+pattern refusing them would refuse honest sentences on every page, and a check
+whoever meets it turns off is worse than no check.
+
+`G-code` is the entry to read before adding a seventh line, because it looks
+refusable and is not:
+
+    git grep -niE '\bg-?code\b' -- docs/decisions/0012-where-the-nearest-projects-fall-short.md
+    docs/decisions/0012-where-the-nearest-projects-fall-short.md:156:machine interprets called Gcode."
+    docs/decisions/0012-where-the-nearest-projects-fall-short.md:294:  ships sketch to G-code in one product. What is missing is a guided path, not
+
+Both are correct text. One is inside a quotation from another product's own
+documentation and the other describes what that product ships. The rejection in
+the stage 6 table is about what this project calls its own output, and no
+pattern separates the two, so the word stays rejected and unrefused.
+
+`snapshot` is the same case one step further out. It is rejected as a term for a
+version, and #85's backup and restore work will legitimately use it for a
+filesystem or volume snapshot, which is a different thing under the same word.
+
 ## What refuses any of this today
 
-Nothing. `PROSE, NOT ENFORCEMENT`, issue #95 for the documentation half and #64
-for the messages half.
+The six words above, and nothing else. `PROSE, NOT ENFORCEMENT` for the rest,
+issue #95 for the documentation half and #64 for the messages half.
 
-A term used in a document and absent from this list is refused by nothing, a
-message using another word is refused by nothing, and a later document choosing
-`revolution` over `revolve` goes green. `.github/invariants.txt` names the
-vocabulary rule among the rules it does not yet carry and says it arrives with
-this list, so this file existing is what that rule was waiting for rather than
-what delivers it.
+A term used in a document and absent from this vocabulary is refused by nothing,
+because the check refuses a declared word rather than admitting a list of
+allowed ones. A message using another word is refused by nothing, because there
+are no messages.
 
-The one thing that is checkable today and is not checked: this list is a tracked
-file, so a check reading it and refusing an off-list term over `docs/` needs no
-code and no interface. That is #95's third condition, and this document is the
-input it asked for.
+`.github/invariants.txt` names the vocabulary rule among the rules it does not
+yet carry, and it is untouched by the check above. That is deliberate and it is
+worth the sentence, because a record there is the cheaper-looking route. A
+record in that file carries its own pattern, so the refused words would be
+written twice, once in this document and once beside the machinery. #95's third
+condition refuses exactly that: the check reads this document rather than a
+copied list. So the refusal lives where it can read this file, and the record
+that file is waiting for is a pattern rule of a shape this list is not.
