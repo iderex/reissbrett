@@ -1,0 +1,323 @@
+# Documentation lint: the things about a document a machine can decide.
+#
+# This project's documentation is load bearing. The decisions in M0 are what
+# later work is checked against, and a reference that has gone stale in one of
+# them is read as current by everybody after it. Three shapes of staleness are
+# decidable from the tree and the tracker, and one more is decidable once a
+# vocabulary exists, so those four are refused here.
+#
+# #95 is the issue. What this check does NOT decide is printed on every run
+# rather than written only here, because a green result on a documentation check
+# is the easiest thing in this repository to over-read.
+#
+# Each leg states where it stops in the comment above it. The bounds are the part
+# to read: a leg that is narrower than its name is a leg somebody trusts too far.
+
+name: documentation-lint
+
+on:
+  # Every branch and every pull request. The legs are read-only and cheap, so a
+  # branch push is where a stale reference is caught before anybody reads it.
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  # contents: the tracked tree is read with git.
+  # issues: leg 2 asks the tracker whether a referenced number exists. Read only;
+  # no step writes an issue, a comment or a label.
+  contents: read
+  issues: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  documentation:
+    # The check run name. It is a literal string somewhere else the day it is
+    # required, so renaming it here is a change that removes a gate.
+    # .github/required-status-checks.md is where a required name is recorded, and
+    # this name is not required on `main` today.
+    name: Lint the documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # No step pushes, so do not persist the GITHUB_TOKEN in .git/config.
+          persist-credentials: false
+
+      - name: Decide what a machine can decide about the documentation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+
+          fail=0
+          vocab='docs/vocabulary.md'
+          names_doc='.github/required-status-checks.md'
+
+          docs=$(git ls-files '*.md')
+          if [ -z "$docs" ]; then
+            echo "::error::No tracked Markdown file was found, so this run examined nothing. Failing closed."
+            exit 1
+          fi
+          echo "Examining $(printf '%s\n' "$docs" | wc -l) tracked Markdown file(s)."
+          echo
+
+          # ------------------------------------------------------------------
+          # Leg 1. A path into this tree that does not resolve.
+          #
+          # The reference form this repository actually uses is a path in
+          # backticks in prose, not a Markdown link, so that is what is read.
+          #
+          # WHERE IT STOPS. A backticked token counts as a reference to THIS tree
+          # only when its first segment is a tracked top level entry. That is the
+          # whole of what separates `docs/threat-model.md` from
+          # `src/Mod/CAM/Path/Op`, which is a path in the suite's tree, and from
+          # `FreeCAD/FreeCAD`, which is a repository. The cost is that a
+          # reference whose top level segment is itself mistyped is invisible
+          # here, and that case is not decidable without guessing what was meant.
+          #
+          # The exemption below is per reference rather than per file, so every
+          # other reference in the same document is still resolved.
+          # ------------------------------------------------------------------
+          echo "leg 1  paths into this tree resolve"
+
+          exempt_ref() {
+            case "$1|$2" in
+              # The prior effort's own repository holds this path. The document
+              # is about that repository, and the sentence says so.
+              'docs/decisions/prior-collaboration-attempt.md|docs/services.md') return 0 ;;
+            esac
+            return 1
+          }
+
+          roots=$(git ls-tree --name-only HEAD | sed 's#/$##' | tr '\n' '|' | sed 's/|$//')
+          if [ -z "$roots" ]; then
+            echo "::error::Could not read the top level of the tracked tree, so leg 1 examined nothing. Failing closed."
+            exit 1
+          fi
+
+          leg1_bad=0
+          leg1_seen=0
+          for f in $docs; do
+            refs=$(grep -oE '`[^`]+`' "$f" | sed 's/^`//; s/`$//' \
+                   | grep -E "^($roots)(/[A-Za-z0-9._-]+)*$" | sort -u)
+            for ref in $refs; do
+              leg1_seen=$((leg1_seen + 1))
+              if git ls-files --error-unmatch "$ref" >/dev/null 2>&1; then
+                continue
+              fi
+              if git ls-files "$ref/" | grep -q .; then
+                continue
+              fi
+              if exempt_ref "$f" "$ref"; then
+                echo "  exempt  ${f}: ${ref}"
+                continue
+              fi
+              echo "::error file=${f}::${ref} is written as a path in this tree and no tracked file or directory has that path. A reference a reader cannot follow is worse than no reference."
+              leg1_bad=$((leg1_bad + 1))
+            done
+          done
+          echo "  resolved ${leg1_seen} reference(s), ${leg1_bad} unresolved"
+          [ "$leg1_bad" -eq 0 ] || fail=1
+          echo
+
+          # ------------------------------------------------------------------
+          # Leg 2. An issue reference that names nothing on this tracker.
+          #
+          # WHERE IT STOPS. Lines indented by four spaces or a tab are skipped.
+          # That is where this repository puts pasted evidence, and a number
+          # inside somebody else's pasted output is somebody else's tracker. The
+          # cost is that a stale reference written inside an indented block is
+          # not seen. Measured rather than assumed: skipping those lines removes
+          # exactly one reference from the population on the day this landed, and
+          # that one is another repository's issue quoted inside a workflow file.
+          #
+          # The listing covers issues and pull requests, which is what the
+          # tracker means by a number, so a reference to a merged pull request
+          # resolves rather than being refused.
+          # ------------------------------------------------------------------
+          echo "leg 2  issue references name something on this tracker"
+
+          known=$(mktemp)
+          if ! gh api --paginate "repos/${REPO}/issues?state=all&per_page=100" --jq '.[].number' > "$known"; then
+            echo "::error::The tracker listing could not be read, so leg 2 decided nothing. Failing closed rather than passing an unexamined reference."
+            exit 1
+          fi
+          if [ ! -s "$known" ]; then
+            echo "::error::The tracker listing came back empty, which would refuse every reference in the tree. Failing closed."
+            exit 1
+          fi
+          sort -u "$known" -o "$known"
+          echo "  tracker knows $(wc -l < "$known" | tr -d ' ') number(s)"
+
+          leg2_bad=0
+          leg2_seen=0
+          for f in $docs; do
+            nums=$(grep -vE '^(    |\t)' "$f" | grep -oE '#[0-9]+' | tr -d '#' | sort -u)
+            for n in $nums; do
+              leg2_seen=$((leg2_seen + 1))
+              if grep -qx "$n" "$known"; then
+                continue
+              fi
+              echo "::error file=${f}::#${n} is referenced here and no issue or pull request with that number exists on ${REPO}."
+              leg2_bad=$((leg2_bad + 1))
+            done
+          done
+          echo "  checked ${leg2_seen} reference(s), ${leg2_bad} naming nothing"
+          [ "$leg2_bad" -eq 0 ] || fail=1
+          echo
+
+          # ------------------------------------------------------------------
+          # Leg 3. A check run name recorded as required that no workflow emits.
+          #
+          # This is the failure .github/required-status-checks.md is most exposed
+          # to: a required context is matched as a string, so a job renamed in a
+          # workflow leaves a name nothing produces, and every merge blocks until
+          # somebody with settings access notices.
+          #
+          # WHERE IT STOPS. It reads the rows under `## The names` in that
+          # document and nothing else, so a check run name mentioned in ordinary
+          # prose anywhere is not resolved. Whether a string in a sentence is
+          # meant as a check run name is a judgement, and this repository has one
+          # document whose declared purpose is to hold those names.
+          #
+          # The section `## The names that must not be required` is deliberately
+          # outside the walk. One of its rows is emitted by an analysis app
+          # rather than by a job, which this leg has no way to see, and the
+          # document already argues that case at the row.
+          # ------------------------------------------------------------------
+          echo "leg 3  every recorded required name is emitted by a workflow job"
+
+          if [ ! -f "$names_doc" ]; then
+            echo "::error::${names_doc} is missing, so leg 3 examined nothing. Failing closed."
+            exit 1
+          fi
+
+          # The emitted name of a job is its `name:` where it has one and its job
+          # id where it does not, which is how the platform names a check run.
+          emitted_names() {
+            awk '
+              /^jobs:[[:space:]]*$/ { injobs = 1; next }
+              injobs && /^[^[:space:]#]/ { injobs = 0 }
+              injobs && /^  [A-Za-z0-9_.-]+:[[:space:]]*$/ {
+                if (job != "") print (nm != "" ? nm : job)
+                job = $0; sub(/^  /, "", job); sub(/:[[:space:]]*$/, "", job); nm = ""
+                next
+              }
+              injobs && /^    name:[[:space:]]/ {
+                if (nm == "") { nm = $0; sub(/^    name:[[:space:]]*/, "", nm); gsub(/^["'"'"']|["'"'"']$/, "", nm) }
+              }
+              END { if (job != "") print (nm != "" ? nm : job) }
+            ' "$1"
+          }
+
+          rows=$(awk '/^## The names$/ { on = 1; next } /^## / { on = 0 } on && /^### / { print substr($0, 5) }' "$names_doc")
+          if [ -z "$rows" ]; then
+            echo "::error::${names_doc} declares no row under '## The names', so leg 3 examined nothing. Failing closed."
+            exit 1
+          fi
+
+          leg3_bad=0
+          leg3_seen=0
+          rowfile=$(mktemp)
+          printf '%s\n' "$rows" > "$rowfile"
+          while IFS= read -r ctx; do
+            [ -n "$ctx" ] || continue
+            leg3_seen=$((leg3_seen + 1))
+            wf=$(awk -v c="### ${ctx}" 'index($0, c) == 1 { on = 1; next } on && /^### / { exit } on' "$names_doc" \
+                 | grep -oE '\.github/workflows/[A-Za-z0-9._-]+\.yml' | head -1)
+            if [ -z "$wf" ]; then
+              echo "::error file=${names_doc}::The row for '${ctx}' names no workflow file, so nothing says which job is meant to emit it."
+              leg3_bad=$((leg3_bad + 1))
+              continue
+            fi
+            if [ ! -f "$wf" ]; then
+              echo "::error file=${names_doc}::The row for '${ctx}' names ${wf} and no such workflow is tracked."
+              leg3_bad=$((leg3_bad + 1))
+              continue
+            fi
+            if emitted_names "$wf" | grep -qxF "$ctx"; then
+              echo "  ok      ${ctx} <- ${wf}"
+            else
+              echo "::error file=${wf}::No job in ${wf} emits the check run name '${ctx}', which ${names_doc} records as required. A required name nothing produces blocks every merge."
+              leg3_bad=$((leg3_bad + 1))
+            fi
+          done < "$rowfile"
+          echo "  checked ${leg3_seen} recorded name(s), ${leg3_bad} unemitted"
+          [ "$leg3_bad" -eq 0 ] || fail=1
+          echo
+
+          # ------------------------------------------------------------------
+          # Leg 4. A word the vocabulary rejected, used in a document.
+          #
+          # The list is read out of docs/vocabulary.md rather than carried here,
+          # which is #95's third condition. A word is added to the refusal by
+          # editing that document and nothing else.
+          #
+          # WHERE IT STOPS. It refuses a declared word; it does not admit a list
+          # of allowed ones. A term absent from the vocabulary altogether passes,
+          # and the vocabulary says which of its rejected words are refusable at
+          # all and why the rest are not.
+          #
+          # docs/vocabulary.md is the one document not scanned, because it is the
+          # file that has to name the refused words in order to declare them.
+          # ------------------------------------------------------------------
+          echo "leg 4  no document uses a word this project rejected"
+
+          if [ ! -f "$vocab" ]; then
+            echo "::error::${vocab} is missing, so leg 4 read no list and decided nothing. Failing closed."
+            exit 1
+          fi
+
+          rules=$(grep -E '^ *refuse: .+ -> .+$' "$vocab" | sed 's/^ *refuse: //')
+          if [ -z "$rules" ]; then
+            echo "::error::${vocab} declares no refused word, so leg 4 examined nothing. Failing closed rather than reporting a clean tree."
+            exit 1
+          fi
+
+          leg4_bad=0
+          leg4_rules=0
+          rulefile=$(mktemp)
+          printf '%s\n' "$rules" > "$rulefile"
+          while IFS= read -r rule; do
+            [ -n "$rule" ] || continue
+            leg4_rules=$((leg4_rules + 1))
+            bad=${rule%% -> *}
+            good=${rule#* -> }
+            hits=$(git grep -niE "\\b${bad}\\b" -- '*.md' ":(exclude)${vocab}" || true)
+            if [ -n "$hits" ]; then
+              while IFS= read -r hit; do
+                [ -n "$hit" ] || continue
+                file=${hit%%:*}
+                echo "::error file=${file}::'${bad}' is a word this project rejected. The term is '${good}', and ${vocab} carries the reason and the rejected alternatives it was chosen over. ${hit}"
+              done <<< "$hits"
+              leg4_bad=$((leg4_bad + 1))
+            else
+              echo "  clean   ${bad} -> ${good}"
+            fi
+          done < "$rulefile"
+          echo "  read ${leg4_rules} refusal(s) out of ${vocab}, ${leg4_bad} of them found in the tree"
+          [ "$leg4_bad" -eq 0 ] || fail=1
+          echo
+
+          # ------------------------------------------------------------------
+          echo "What this run does not judge."
+          echo "  Whether a document is clear, whether a decision is well argued, and whether the reasoning in it holds. Those are review questions and a green result here is not an endorsement of any of them."
+          echo "  Whether a command shown in a fenced block parses, which #95 also asks for. In this repository a fenced block holds a command and the output it produced with nothing marking which lines are which, so nothing in the text separates the two. That is a gap in what #95 asks rather than one in this file, and it is recorded on the issue."
+          echo "  Formatting and trailing structure. docs/gate-parity.md sends that half to #17 with the reason, and this check adds nothing to it."
+          echo "  Whether the words this vocabulary chose are the right words. That is #67's measurement and no reading of the tree makes it."
+          echo
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::The documentation lint refused this tree. Every refusal above names the file and what is wrong with it."
+            exit 1
+          fi
+          echo "All four legs passed."
