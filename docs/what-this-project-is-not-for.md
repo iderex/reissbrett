@@ -163,10 +163,53 @@ compares this document against a change that narrowed a limit, and a pull
 request that deletes the section entirely is refused by nothing. So the rule at
 the top of this document is still the only thing holding the sharper statement,
 and it is a rule about how a file is edited, which is the kind this tree has
-nothing to read. #95 is the nearest thing that could ever reach it, and what it
-would reach is a broken reference rather than a softened sentence.
+nothing to read.
 
-It asks for consistency with the warranty disclaimer once #100 lands. #100 is
-open. The section above reads the licence text in the tree, which is the
-disclaimer itself rather than the analysis #100 owes, and those are different
-things.
+#95's check exists now, and naming what it reaches makes that disclosure
+smaller rather than larger. `.github/workflows/documentation-lint.yml` refuses a
+path into this tree that does not resolve, an issue reference that names nothing
+on this tracker, a required check run name no workflow job emits, and a word the
+vocabulary rejected. None of those is a limit that got gentler. A sentence here
+softened tomorrow passes all four legs.
+
+It asks for consistency with the warranty disclaimer once #100 lands. THIS
+PARAGRAPH SAID #100 WAS OPEN AND THAT THE ANALYSIS IT OWES HAD NOT LANDED. The
+issue is open and the analysis landed the morning after this was written:
+
+    git log --format='%h %ad %s' --date=iso -1 -- docs/decisions/0100-the-licence-split-and-the-suite.md
+    850c577 2026-08-09 07:05:03 +0200 Write the licence analysis against the suite (#100)
+
+What that changes for this document is less than it looks, and the smaller answer
+is the honest one. The analysis makes no warranty statement at all, so there is
+no second thing for this document to be consistent with:
+
+    git show origin/main:docs/decisions/0100-the-licence-split-and-the-suite.md | grep -ciE 'warrant|liabilit|disclaim'
+    0
+
+It is a compatibility reading of licence texts against the shape of the
+artefacts, which is a different question from what this project promises about
+what its software does. So the licence half of that condition is discharged by
+the licence text in the section above and by nothing else, and the condition's
+own wording, which expects the disclaimer to come from #100, does not describe
+where the disclaimer actually is.
+
+What the analysis does carry is a limit of its own, and it travels with anything
+that leans on it:
+
+    git show origin/main:docs/decisions/0100-the-licence-split-and-the-suite.md | sed -n '13,16p'
+    This is an engineering reading of licence texts against the shape of the
+    artefacts, made from the sources it quotes. It is not legal advice and nobody
+    qualified to give any has read it. Where it depends on something it did not
+    measure, the dependency is in the sentence rather than in a closing paragraph.
+
+Nothing in this document leans on it. That is stated so a later reader does not
+take the analysis for a legal opinion standing behind the limits above, which is
+the direction this document is written against.
+
+The other half of the condition has not moved. #79's warning does not exist to
+be checked against:
+
+    gh api repos/iderex/reissbrett/issues/79 --jq '"#\(.number) \(.state) \(.title)"'
+    #79 open Write the operator's warning about running a produced program
+    git ls-tree -r --name-only origin/main -- docs/ | grep -c 'warning'
+    0
