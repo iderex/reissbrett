@@ -229,3 +229,5 @@ whom is #103's document and their decision, and this model assumes the bad case
 rather than the documented one.
 
 A reference nobody can follow: `docs/this-file-does-not-exist.md`.
+
+This follows from #9999, which is not on this tracker.
