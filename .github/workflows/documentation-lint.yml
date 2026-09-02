@@ -25,10 +25,15 @@ on:
 
 permissions:
   # contents: the tracked tree is read with git.
-  # issues: leg 2 asks the tracker whether a referenced number exists. Read only;
-  # no step writes an issue, a comment or a label.
+  # issues and pull-requests: leg 2 asks the tracker whether a referenced number
+  # exists. A number on this tracker is an issue or a pull request, and the
+  # issues listing returns pull requests only when the token may read them: with
+  # `issues: read` alone the runner saw 122 numbers where the tree references
+  # 169, and refused two live pull request references. Both are read only and no
+  # step writes an issue, a pull request, a comment or a label.
   contents: read
   issues: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
