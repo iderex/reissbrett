@@ -228,4 +228,4 @@ It does not cover the operator's own deployment. What an operator exposes and to
 whom is #103's document and their decision, and this model assumes the bad case
 rather than the documented one.
 
-The second feature is a revolution around an axis.
+This follows from #9999, which is not on this tracker.
