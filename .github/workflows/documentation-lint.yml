@@ -56,6 +56,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
+          # The platform runs this step under `bash -e`, and `-e` is wrong for
+          # these legs: a search that matches nothing exits non-zero, and here
+          # that is the ordinary answer rather than a failure. Leaving it on ends
+          # the run at the first document holding no backticked path, which is a
+          # green-looking abort. So it is turned off deliberately, and every
+          # place where a non-zero genuinely means the scan broke is tested by
+          # name below and fails the run closed.
+          set +e
           set -uo pipefail
 
           fail=0
@@ -146,7 +154,7 @@ jobs:
           # ------------------------------------------------------------------
           echo "leg 2  issue references name something on this tracker"
 
-          known=$(mktemp)
+          known=$(mktemp) || { echo "::error::Could not create a temporary file, so leg 2 examined nothing. Failing closed."; exit 1; }
           if ! gh api --paginate "repos/${REPO}/issues?state=all&per_page=100" --jq '.[].number' > "$known"; then
             echo "::error::The tracker listing could not be read, so leg 2 decided nothing. Failing closed rather than passing an unexamined reference."
             exit 1
@@ -227,7 +235,7 @@ jobs:
 
           leg3_bad=0
           leg3_seen=0
-          rowfile=$(mktemp)
+          rowfile=$(mktemp) || { echo "::error::Could not create a temporary file, so leg 3 examined nothing. Failing closed."; exit 1; }
           printf '%s\n' "$rows" > "$rowfile"
           while IFS= read -r ctx; do
             [ -n "$ctx" ] || continue
@@ -285,7 +293,7 @@ jobs:
 
           leg4_bad=0
           leg4_rules=0
-          rulefile=$(mktemp)
+          rulefile=$(mktemp) || { echo "::error::Could not create a temporary file, so leg 4 examined nothing. Failing closed."; exit 1; }
           printf '%s\n' "$rules" > "$rulefile"
           while IFS= read -r rule; do
             [ -n "$rule" ] || continue
