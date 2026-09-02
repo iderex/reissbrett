@@ -404,11 +404,35 @@ tag. The rules file says so at the rule rather than only here. So the entry is
 refused in the two halves a content search decides and is not refused in the
 half that would catch somebody who took the banner off.
 
-The other six entries are refused by nothing at all. The import half belongs to
-#98, which has landed nothing, and nothing in the rules file is about writing
-into a document, assigning to an internal name, modifying a file the suite has
-open, calling `purgeTouched`, reaching into a private path, or loading the suite
-in the listening process:
+The other six entries are refused by nothing at all. THIS PARAGRAPH SAID THE
+IMPORT HALF BELONGS TO #98, WHICH HAS LANDED NOTHING. It has landed something,
+and the six are refused by nothing all the same, for a reason worth reading
+rather than for the old one:
+
+    git ls-tree -r --name-only origin/main -- docs/architecture-rules.md
+    docs/architecture-rules.md
+
+What landed is a list of rules and not a test, and that file says so under its
+own first heading rather than leaving it to be inferred:
+
+    git show origin/main:docs/architecture-rules.md | sed -n '10,12p'
+    ## Nothing here is enforced
+
+    No rule below is a test. There is no code in any language for a test to read:
+
+Two of the six entries have a written home there now. Loading the suite in the
+listening process is A1 and reaching into a private path is A7:
+
+    git show origin/main:docs/architecture-rules.md | grep -nE '^### A(1|7)\.'
+    64:### A1. The listening process does not reach the suite
+    111:### A7. No unit reaches into the suite's private surfaces
+
+So the import half has moved from unwritten to written and has not moved from
+unenforced to enforced, and those are two different states. The other four are
+named in that file's own section on what no rule there reaches, as legal calls
+that leave a document in a state it should not be in, which is what this document
+already says of them and which no reading of this tree decides. Nothing in the
+pattern rules file is about any of the six:
 
     git show origin/main:.github/invariants.txt | grep -cE 'purgeTouched|internal name|private path|listening process'
     0
