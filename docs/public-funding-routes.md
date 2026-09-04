@@ -219,12 +219,13 @@ one form or another:
     gh api repos/iderex/reissbrett --jq '{visibility, created_at}'
     {"created_at":"2026-08-06T01:51:17Z","visibility":"public"}
     gh issue list --repo iderex/reissbrett --state all --limit 400 --json number --jq 'length'
-    118
+    122
     git ls-tree -r --name-only origin/main -- docs/ | wc -l
-    14
+    30
 
-The last two numbers were read before this document landed and both move as work
-lands, this file included, so a reader re-runs them rather than quoting these.
+The last two numbers move as work lands, this file included, so a reader re-runs
+them rather than quoting these. They were 118 and 14 when this section was
+written.
 
 No code, which is the fact two of the conditions above turn on:
 
@@ -236,13 +237,21 @@ project, and it is why the FPA's public track record criterion cannot be
 satisfied out of this repository. Whether it is satisfied from anywhere else is
 not a fact of this tree, and this document does not claim either way.
 
-No governance document and no code of conduct:
+A governance document and a code of conduct, and no citation file, which is the
+third thing the pattern below looks for:
 
     git ls-tree -r --name-only origin/main | grep -iE 'CODE_OF_CONDUCT|GOVERNANCE|CITATION' ; echo "exit=$?"
-    exit=1
+    .github/CODE_OF_CONDUCT.md
+    .github/GOVERNANCE.md
+    exit=0
 
-#106 holds that. Whether a legal entity exists is not a fact of this tree either,
-so it is not asserted here in either direction. What is recorded above is what
+This paragraph said the repository had neither, and it said so from the day #143
+landed both under #106 until this edit. What #106 is still open on is narrower
+and is not the files existing: no message has been sent through the contact
+route the code of conduct names, so whether a report would arrive is untested.
+A route that has not been tested is not a route a funder is owed a claim about.
+Whether a legal entity exists is not a fact of this tree either, so it is not
+asserted here in either direction. What is recorded above is what
 each route requires: the FPA contracts with an individual, and the routes that
 need more than that say so on their own pages.
 
