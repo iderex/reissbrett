@@ -39,7 +39,12 @@ that produced it:
     docs/decisions/0012-where-the-nearest-projects-fall-short.md
     docs/decisions/0013-the-bar-for-a-coherent-workflow.md
     docs/decisions/0037-the-process-boundary.md
+    docs/decisions/0050-the-permission-model.md
+    docs/decisions/0082-what-may-appear-in-a-log.md
+    docs/decisions/0084-the-metrics-and-their-export.md
     docs/decisions/0100-the-licence-split-and-the-suite.md
+    docs/decisions/0116-protecting-the-client-server-connection.md
+    docs/decisions/0118-the-interface-language.md
     docs/decisions/prior-collaboration-attempt.md
 
 The file without a number is a study rather than a decision. It records what an
@@ -61,10 +66,16 @@ Every change starts as an issue and lands as a pull request. `CONTRIBUTING.md`
 states it and the ruleset on `main` refuses a direct push:
 
     gh api repos/iderex/reissbrett/rulesets/20485819 --jq '{enforcement, bypass: .bypass_actors, rules: [.rules[].type]}'
-    {"bypass":[],"enforcement":"active","rules":["deletion","non_fast_forward","pull_request","required_status_checks"]}
+    {"bypass":[],"enforcement":"active","rules":["deletion","non_fast_forward","pull_request","required_status_checks","required_signatures"]}
 
 The bypass actor list is empty, so the account that owns the repository goes
 through a pull request as well.
+
+`required_signatures` is the fifth rule and it was not there when this section
+was first written, which is why the output above is the one the command returns
+rather than the one it used to. A commit carrying no verified signature does not
+reach `main`, mine included, and `docs/verified-signatures.md` is where that was
+asked for and argued.
 
 Status checks are among the rules, and which names are required is not repeated
 here, because a list in a document drifts against the setting it describes and
