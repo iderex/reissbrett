@@ -158,11 +158,11 @@ announce, and completeness across every mutation is not something an announcing
 interface can promise.
 
 The dependency is stated rather than hidden: entry 3 of #1, whether this project
-ever ships a patched build of the suite, is open and belongs to the maintainer.
-This rejection is written against #4's proposal, which is what the board has
-today. It is not written against a decision that has been made, and if entry 3
-is answered in favour of a patched build then this rejection is one of the
-things that answer reopens.
+ever ships a patched build of the suite, is open and is mine to answer. This
+rejection is written against #4's proposal, which is what the board has today.
+It is not written against a decision that has been made, and if entry 3 is
+answered in favour of a patched build then this rejection is one of the things
+that answer reopens.
 
 What would have to change for this to be looked at again. Either #33's extension
 surface note listing an interface that reports every mutation of a document, in
@@ -278,9 +278,9 @@ client that asks for too much.
 ## What this document does not decide
 
 Entry 6 of #1, whether federation between operators is ever offered, is open and
-belongs to the maintainer. This model assumes a project lives on one operator's
-server. Nothing above forecloses federation, and #48 is where it would either be
-made possible later or made expensive.
+is mine to answer. This model assumes a project lives on one operator's server.
+Nothing above forecloses federation, and #48 is where it would either be made
+possible later or made expensive.
 
 Entry 3 of #1, whether this project ever ships a patched build, is open and is
 named above as the thing that would reopen one of the two rejections. This

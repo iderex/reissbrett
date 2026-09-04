@@ -189,8 +189,8 @@ avoids.
 So `hello.accepted` above is specified without one, and that is a gap rather than
 a decision. Adding the field later moves the protocol version under the policy
 already written, which is what makes leaving it out survivable and is not an
-argument for leaving it out. This is the one thing on this contract that belongs
-to the maintainer, and it is the only field below whose presence is undecided.
+argument for leaving it out. This is the one thing on this contract that is mine
+to decide, and it is the only field below whose presence is undecided.
 
 ## The message set
 
@@ -666,8 +666,8 @@ same answer rather than the change a second time.
 
 Three conditions, each checkable.
 
-If the maintainer answers the open field above in favour of a server identity in
-the negotiation, it is added, the protocol version does not move because nothing
+If I answer the open field above in favour of a server identity in the
+negotiation, it is added, the protocol version does not move because nothing
 has been built yet, and the answer is written down here and not assumed.
 
 If #117's measurements show the control channel is a measurable cost at the size

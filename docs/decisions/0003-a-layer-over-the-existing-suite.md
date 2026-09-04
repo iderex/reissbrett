@@ -49,8 +49,8 @@ made outside the kernel, by choosing what to expose and in what order.
 A stable interface is a decision about what the workspace looks like when it
 opens and what it does when the person is finished. That is made outside the
 kernel as well, though how much of it is reachable from outside is the separate
-question that issue #4 settles and that entry 3 of #1 keeps open at the
-maintainer's level.
+question that issue #4 settles and that entry 3 of #1 keeps open for me to
+answer.
 
 Collaboration is about who may write which document when, and about how a
 published change reaches the people who reference it. It touches the document

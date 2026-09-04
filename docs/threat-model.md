@@ -119,11 +119,11 @@ reported upstream, which `.github/SECURITY.md` already says and does not
 restate here. What this project does own is how it configures, packages and
 ships that suite, which is inside T3 and T5 rather than outside this document.
 
-**N5. Somebody who is trusted to merge here.** There is one maintainer. Nothing
-in this repository refuses a change that person makes, and the second reader that
-would catch one is prose rather than a mechanism, which `CONTRIBUTING.md` says
-in its own words. This is accepted rather than addressed, and what would change
-it is a second person rather than a check.
+**N5. Somebody who is trusted to merge here.** I am the only person with write
+access. Nothing in this repository refuses a change I make, and the second
+reader that would catch one is prose rather than a mechanism, which
+`CONTRIBUTING.md` says in its own words. This is accepted rather than addressed,
+and what would change it is a second person rather than a check.
 
 ## Threats accepted with a reason
 

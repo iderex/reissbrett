@@ -67,9 +67,9 @@ later with more than it does.
 
 A signature says who wrote a commit. It does not say the commit is good. N5 of
 the threat model is somebody trusted to merge here, and it is accepted rather
-than addressed, because there is one maintainer and their own commits verify. A
-signature requirement does nothing for that case and it is not offered as if it
-did.
+than addressed, because I am the only person with write access and my own
+commits verify. A signature requirement does nothing for that case and it is not
+offered as if it did.
 
 It also does not reach a compromised workstation belonging to somebody who
 legitimately has access, which is N3. A signing key on that machine signs

@@ -209,8 +209,8 @@ Nothing on this board reduces that for text.
 A route for the text to be reviewed by somebody who reads the target language
 and can refuse a wrong term. This is the expensive one and it is not a tooling
 problem. `.github/GOVERNANCE.md` records that one account has write access here
-and that there is no second maintainer, so today there is no second reader for
-a second language and adding one is adding a person rather than a file.
+and that there is nobody beside me, so today there is no second reader for a
+second language and adding one is adding a person rather than a file.
 
 The vocabulary in #63 would have to hold in two languages at once. Its own
 condition checks the documentation and the messages against one string set, and
