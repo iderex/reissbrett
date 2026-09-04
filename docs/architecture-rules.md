@@ -152,8 +152,8 @@ them, and no mechanism is owed:
 
     git grep -n '#98' origin/main -- docs/extension-surface.md
     origin/main:docs/extension-surface.md:307:they are written so that #98 can turn the ones about imports into tests.
-    origin/main:docs/extension-surface.md:408:#98, which has landed nothing, and nothing in the rules file is about writing
-    origin/main:docs/extension-surface.md:417:the copy-or-patch entry named above, issues #91 and #98. The permission list is
+    origin/main:docs/extension-surface.md:408:IMPORT HALF BELONGS TO #98, WHICH HAS LANDED NOTHING. It has landed something,
+    origin/main:docs/extension-surface.md:441:the copy-or-patch entry named above, issues #91 and #98. The permission list is
 
 ## How a rule stays attached to the issue that decided it
 
