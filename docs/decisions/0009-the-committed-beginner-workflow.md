@@ -111,8 +111,8 @@ Exit: a post-processed program for the machine class chosen in entry 5 of #1,
 refused by #75 if the toolpath would collide with the stock, and recorded
 against the model version it was produced from by #77.
 
-The machine class is not chosen here. Entry 5 of #1 is open, it belongs to the
-maintainer, and stage 6 is written so that its exit condition is complete for
+The machine class is not chosen here. Entry 5 of #1 is open, it is mine to
+answer, and stage 6 is written so that its exit condition is complete for
 whichever class is chosen. #10 stages the machining work and #74 pins the post
 processor once there is a class to pin one for.
 

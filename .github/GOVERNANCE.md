@@ -16,7 +16,7 @@ is the only one with write access:
     gh api repos/iderex/reissbrett/collaborators --jq '[.[] | .login] | join(", ")'
     iderex
 
-There is no committee, no steering group and no second maintainer. What makes a
+There is no committee, no steering group and nobody beside me. What makes a
 decision reviewable here is not that a vote was held. It is that the reasoning
 is written down where somebody can argue with it.
 
@@ -93,12 +93,12 @@ If write access is given to somebody else, this document is updated in the
 change that grants it, and the collaborator command above is what shows whether
 that has happened.
 
-If the single maintainer stops, nothing here continues on its own. There is no
-second person with access, no organisation behind the repository, and no
-succession arrangement, and this document does not invent one. What remains in
-that case is what the licence already gives you, which is the right to take the
-code and carry on under the same terms. `LICENSE` is the GNU Affero General
-Public License version 3.
+If I stop, nothing here continues on its own. There is no second person with
+access, no organisation behind the repository, and no succession arrangement,
+and this document does not invent one. What remains in that case is what the
+licence already gives you, which is the right to take the code and carry on
+under the same terms. `LICENSE` is the GNU Affero General Public License
+version 3.
 
 ## The code of conduct, and what is not established about its route
 
